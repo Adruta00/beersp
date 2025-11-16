@@ -4,20 +4,20 @@ import { useAuthenticator } from '@aws-amplify/ui-react';
 import type { Schema } from '../amplify/data/resource';
 
 // Components
-import Header from './components/layout/Header';
-import Navigation from './components/layout/Navigation';
-import Footer from './components/layout/Footer';
-import AgeVerification from './components/auth/AgeVerification';
+import Header from './Header';
+import Footer from './Footer';
+
 
 // Pages
-import Home from './pages/Home';
-import Profile from './pages/Profile';
-import Friends from './pages/Friends';
-import TopRated from './pages/TopRated';
-import AddTasting from './pages/AddTasting';
-import Search from './pages/Search';
+import Home from '../../pages/Home';
+import Profile from '../../pages/Profile';
+import Friends from '../../pages/Friends';
+import TopRated from '../../pages/TopRated';
+import AddTasting from '../../pages/AddTasting';
+import Search from '../../pages/Search';
 
-import './App.css';
+
+import '../../App.css';
 
 const client = generateClient<Schema>();
 
