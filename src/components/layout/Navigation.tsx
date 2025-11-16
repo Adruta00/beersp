@@ -1,106 +1,154 @@
-.navigation {
-  width: 250px;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
-  box-shadow: var(--shadow-md);
-  height: fit-content;
-  position: sticky;
-  top: calc(80px + var(--spacing-md));
-}
+import { useState, useEffect } from 'react';
+import { generateClient } from 'aws-amplify/data';
+import { useAuthenticator } from '@aws-amplify/ui-react';
+import type { Schema } from '../amplify/data/resource';
 
-.nav-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
+// Components
+import Header from './components/layout/Header';
+import Navigation from './components/layout/Navigation';
+import Footer from './components/layout/Footer';
+import AgeVerification from './components/auth/AgeVerification';
 
-.nav-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: var(--radius-md);
-  border: none;
-  background: transparent;
-  color: var(--color-text);
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  text-align: left;
-}
+// Pages
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+import Friends from './pages/Friends';
+import TopRated from './pages/TopRated';
+import AddTasting from './pages/AddTasting';
+import Search from './pages/Search';
 
-.nav-item:hover {
-  background: var(--color-surface-dark);
-  transform: translateX(4px);
-}
+import './App.css';
 
-.nav-item.active {
-  background: var(--color-primary);
-  color: white;
-  box-shadow: var(--shadow-sm);
-}
+const client = generateClient<Schema>();
 
-.nav-item.active:hover {
-  background: var(--color-primary-dark);
-}
+type Page = 'home' | 'profile' | 'friends' | 'top-rated' | 'add-tasting' | 'search';
 
-.nav-icon {
-  font-size: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-}
+function App() {
+  const { user, signOut } = useAuthenticator();
+  const [currentPage, setCurrentPage] = useState<Page>('home');
+  const [isAgeVerified, setIsAgeVerified] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-.nav-label {
-  flex: 1;
-}
+  useEffect(() => {
+    checkUserProfile();
+  }, [user]);
 
-@media (max-width: 1024px) {
-  .navigation {
-    width: 100%;
-    position: static;
-    margin-bottom: var(--spacing-md);
+  const checkUserProfile = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Intentar cargar el perfil del usuario
+      const { data: profiles } = await client.models.UserProfile.list({
+        filter: { userId: { eq: user.userId } }
+      });
+
+      if (profiles && profiles.length > 0) {
+        setUserProfile(profiles[0]);
+        setIsAgeVerified(true);
+      } else {
+        // No existe perfil, necesita verificación de edad
+        setIsAgeVerified(false);
+      }
+    } catch (error) {
+      console.error('Error checking profile:', error);
+      setIsAgeVerified(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAgeVerified = async (birthdate: Date, additionalData: any) => {
+    if (!user) return;
+
+    try {
+      const { data } = await client.models.UserProfile.create({
+        userId: user.userId,
+        username: user.username || user.signInDetails?.loginId?.split('@')[0] || 'user',
+        email: user.signInDetails?.loginId || '',
+        birthdate: birthdate.toISOString().split('T')[0],
+        fullName: additionalData.fullName || undefined,
+        lastName: additionalData.lastName || undefined,
+        location: additionalData.location || undefined,
+        bio: additionalData.bio || undefined,
+        tastingsCount: 0,
+        venuesAdded: 0,
+        lastSevenDaysTastings: 0,
+        lastSevenDaysVenues: 0,
+      });
+
+      if (data) {
+        setUserProfile(data);
+        setIsAgeVerified(true);
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      alert('Error al crear el perfil. Por favor, intenta de nuevo.');
+    }
+  };
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <Home userProfile={userProfile} />;
+      case 'profile':
+        return <Profile userProfile={userProfile} />;
+      case 'friends':
+        return <Friends />;
+      case 'top-rated':
+        return <TopRated />;
+      case 'add-tasting':
+        return <AddTasting />;
+      case 'search':
+        return <Search />;
+      default:
+        return <Home userProfile={userProfile} />;
+    }
+  };
+
+  // Mostrar loading mientras se verifica el usuario
+  if (loading) {
+    return (
+      <div className="app loading-screen">
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Cargando...</p>
+        </div>
+      </div>
+    );
   }
 
-  .nav-list {
-    flex-direction: row;
-    overflow-x: auto;
-    gap: var(--spacing-xs);
-    padding-bottom: var(--spacing-xs);
+  // Mostrar verificación de edad si no está verificado
+  if (!isAgeVerified) {
+    return <AgeVerification onVerified={handleAgeVerified} />;
   }
 
-  .nav-item {
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
+  // Aplicación principal
+  return (
+    <div className="app">
+      <Header
+        username={userProfile?.username || 'Usuario'}
+        photo={userProfile?.photo}
+        onSignOut={signOut}
+      />
 
-  .nav-item:hover {
-    transform: translateX(0);
-    transform: translateY(-2px);
-  }
+      <div className="app-content">
+        <Navigation
+          currentPage={currentPage}
+          onNavigate={setCurrentPage}
+        />
+
+        <main className="main-content">
+          {renderPage()}
+        </main>
+      </div>
+
+      <Footer />
+    </div>
+  );
 }
 
-@media (max-width: 768px) {
-  .navigation {
-    padding: var(--spacing-sm);
-  }
-
-  .nav-label {
-    display: none;
-  }
-
-  .nav-item {
-    padding: var(--spacing-sm);
-    justify-content: center;
-    min-width: 48px;
-  }
-
-  .nav-icon {
-    width: auto;
-  }
-}
+export default App;

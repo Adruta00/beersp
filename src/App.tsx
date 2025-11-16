@@ -3,16 +3,19 @@ import { generateClient } from 'aws-amplify/data';
 import { useAuthenticator } from '@aws-amplify/ui-react';
 import type { Schema } from '../amplify/data/resource';
 
-// Components (to be created)
+// Components
 import Header from './components/layout/Header';
 import Navigation from './components/layout/Navigation';
+import Footer from './components/layout/Footer';
+import AgeVerification from './components/auth/AgeVerification';
+
+// Pages
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import TopRated from './pages/TopRated';
 import AddTasting from './pages/AddTasting';
 import Search from './pages/Search';
-import AgeVerification from './components/auth/AgeVerification';
 
 import './App.css';
 
@@ -25,45 +28,67 @@ function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [isAgeVerified, setIsAgeVerified] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user has completed age verification
-    const checkAgeVerification = async () => {
-      if (user) {
-        try {
-          const profile = await client.models.UserProfile.get({ userId: user.userId });
-          if (profile.data) {
-            setUserProfile(profile.data);
-            setIsAgeVerified(true);
-          }
-        } catch (error) {
-          console.error('Error checking profile:', error);
-        }
-      }
-    };
-
-    checkAgeVerification();
+    checkUserProfile();
   }, [user]);
 
-  const handleAgeVerified = async (birthdate: Date, additionalData: any) => {
-    // Create user profile
+  const checkUserProfile = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      await client.models.UserProfile.create({
-        userId: user.userId,
-        username: user.username || user.signInDetails?.loginId || '',
-        email: user.signInDetails?.loginId || '',
-        birthdate: birthdate.toISOString().split('T')[0],
-        ...additionalData,
+      // Intentar cargar el perfil del usuario
+      const { data: profiles } = await client.models.UserProfile.list({
+        filter: { userId: { eq: user.userId } }
       });
-      setIsAgeVerified(true);
+
+      if (profiles && profiles.length > 0) {
+        setUserProfile(profiles[0]);
+        setIsAgeVerified(true);
+      } else {
+        // No existe perfil, necesita verificación de edad
+        setIsAgeVerified(false);
+      }
     } catch (error) {
-      console.error('Error creating profile:', error);
+      console.error('Error checking profile:', error);
+      setIsAgeVerified(false);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!isAgeVerified) {
-    return <AgeVerification onVerified={handleAgeVerified} />;
-  }
+  const handleAgeVerified = async (birthdate: Date, additionalData: any) => {
+    if (!user) return;
+
+    try {
+      const { data } = await client.models.UserProfile.create({
+        userId: user.userId,
+        username: user.username || user.signInDetails?.loginId?.split('@')[0] || 'user',
+        email: user.signInDetails?.loginId || '',
+        birthdate: birthdate.toISOString().split('T')[0],
+        fullName: additionalData.fullName || undefined,
+        lastName: additionalData.lastName || undefined,
+        location: additionalData.location || undefined,
+        bio: additionalData.bio || undefined,
+        tastingsCount: 0,
+        venuesAdded: 0,
+        lastSevenDaysTastings: 0,
+        lastSevenDaysVenues: 0,
+      });
+
+      if (data) {
+        setUserProfile(data);
+        setIsAgeVerified(true);
+      }
+    } catch (error) {
+      console.error('Error creating profile:', error);
+      alert('Error al crear el perfil. Por favor, intenta de nuevo.');
+    }
+  };
 
   const renderPage = () => {
     switch (currentPage) {
@@ -84,10 +109,28 @@ function App() {
     }
   };
 
+  // Mostrar loading mientras se verifica el usuario
+  if (loading) {
+    return (
+      <div className="app loading-screen">
+        <div className="loading">
+          <div className="spinner"></div>
+          <p>Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar verificación de edad si no está verificado
+  if (!isAgeVerified) {
+    return <AgeVerification onVerified={handleAgeVerified} />;
+  }
+
+  // Aplicación principal
   return (
     <div className="app">
       <Header
-        username={userProfile?.username || ''}
+        username={userProfile?.username || 'Usuario'}
         photo={userProfile?.photo}
         onSignOut={signOut}
       />
@@ -102,6 +145,8 @@ function App() {
           {renderPage()}
         </main>
       </div>
+
+      <Footer />
     </div>
   );
 }

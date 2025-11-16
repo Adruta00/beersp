@@ -1,0 +1,302 @@
+.add-tasting-page {
+  animation: fadeIn var(--transition-base);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.page-header {
+  text-align: center;
+  margin-bottom: var(--spacing-xl);
+}
+
+.page-header h1 {
+  margin: 0 0 var(--spacing-xs) 0;
+  color: var(--color-text);
+  font-size: 2rem;
+}
+
+.page-description {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Search Section */
+.search-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.search-input-group {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.search-results h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-text);
+}
+
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.beer-result-card {
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-dark);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+
+.beer-result-card:hover {
+  background: var(--color-primary-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.beer-result-image {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-sm);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.beer-result-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.beer-placeholder {
+  font-size: 3rem;
+}
+
+.beer-result-info h5 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.beer-result-info p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.new-beer-option {
+  padding: var(--spacing-lg);
+  border: 2px dashed var(--color-primary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.new-beer-option p {
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-text-secondary);
+}
+
+/* Forms */
+.new-beer-form,
+.tasting-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid #ddd;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-primary);
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-surface-dark);
+}
+
+/* Selected Beer Info */
+.selected-beer-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.beer-image-small {
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.beer-image-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.beer-image-small .beer-placeholder {
+  font-size: 2rem;
+}
+
+.selected-beer-info h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 1.25rem;
+  color: var(--color-text);
+}
+
+.selected-beer-info p {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* Venue Section */
+.venue-section {
+  padding: var(--spacing-md);
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-md);
+}
+
+.venue-section h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.venue-results {
+  margin: var(--spacing-md) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.venue-item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border: 2px solid transparent;
+}
+
+.venue-item:hover {
+  background: var(--color-primary-light);
+}
+
+.venue-item.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.venue-item strong {
+  display: block;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-xs);
+}
+
+.venue-item p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.new-venue-form {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-surface);
+}
+
+.new-venue-form p {
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.checkbox-group {
+  padding: var(--spacing-md);
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-md);
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .add-tasting-page {
+    max-width: 100%;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .search-input-group {
+    flex-direction: column;
+  }
+
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
