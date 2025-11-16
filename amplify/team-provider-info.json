@@ -10,6 +10,11 @@
       "StackName": "amplify-amplifyvitereacttemp-dev-febaf",
       "StackId": "arn:aws:cloudformation:eu-west-1:195420741022:stack/amplify-amplifyvitereacttemp-dev-febaf/d473c240-c30e-11f0-86dc-0685b8791fd9",
       "AmplifyAppId": "dxkb5xghqdk28"
+    },
+    "categories": {
+      "auth": {
+        "amplifyvitereacttempb1f94b69": {}
+      }
     }
   }
 }

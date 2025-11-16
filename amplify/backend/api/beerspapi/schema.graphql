@@ -1,0 +1,237 @@
+# -------------------------------
+# Enums
+# -------------------------------
+enum BeerStyle {
+  LAGER
+  IPA
+  APA
+  STOUT
+  SAISON
+  PORTER
+  PILSNER
+  WEISSBIER
+  SOUR_ALE
+  LAMBIC
+  AMBER_ALE
+}
+
+enum BeerColor {
+  LIGHT_GOLD
+  GOLDEN_YELLOW
+  LIGHT_AMBER
+  DARK_BROWN
+  OPAQUE_BLACK
+}
+
+enum BeerSize {
+  PINT
+  HALF_PINT
+  THIRD
+}
+
+enum BeerFormat {
+  DRAFT
+  CAN
+  BOTTLE
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum BadgeCategory {
+  TASTINGS
+  COUNTRIES
+  STYLES
+  VENUES
+  COMMENTS
+}
+
+# -------------------------------
+# User Profile
+# -------------------------------
+type UserProfile @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  userId: ID!
+  username: String!
+  email: String!
+  birthdate: AWSDate!
+  fullName: String
+  lastName: String
+  photo: String
+  location: String
+  bio: String
+  gender: String
+  tastingsCount: Int!
+  venuesAdded: Int!
+  lastSevenDaysTastings: Int!
+  lastSevenDaysVenues: Int!
+  tastings: [Tasting] @hasMany(indexName: "byUser", fields: ["id"])
+  comments: [Comment] @hasMany(indexName: "byAuthor", fields: ["id"])
+  userBadges: [UserBadge] @hasMany(indexName: "byUser", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Beer
+# -------------------------------
+type Beer @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  name: String!
+  style: BeerStyle!
+  country: String!
+  description: String
+  photo: String
+  alcoholPercentage: Float
+  ibu: Float
+  color: BeerColor!
+  averageRating: Float!
+  ratingsCount: Int!
+  tastings: [Tasting] @hasMany(indexName: "byBeer", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Venue
+# -------------------------------
+type Venue @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  name: String!
+  address: String!
+  city: String
+  country: String
+  latitude: Float
+  longitude: Float
+  likes: Int!
+  tastings: [Tasting] @hasMany(indexName: "byVenue", fields: ["id"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Tasting
+# -------------------------------
+type Tasting @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  userId: ID!
+  beerId: ID!
+  venueId: ID
+  rating: Int
+  size: BeerSize!
+  format: BeerFormat!
+  consumptionCountry: String!
+  consumptionDate: AWSDateTime!
+  liked: Boolean!
+  comments: [Comment] @hasMany(indexName: "byTasting", fields: ["id"])
+  beer: Beer @belongsTo(fields: ["beerId"])
+  venue: Venue @belongsTo(fields: ["venueId"])
+  user: UserProfile @belongsTo(fields: ["userId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Comment
+# -------------------------------
+type Comment @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  tastingId: ID!
+  authorId: ID!
+  content: String!
+  tasting: Tasting @belongsTo(fields: ["tastingId"])
+  author: UserProfile @belongsTo(fields: ["authorId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Badge
+# -------------------------------
+type Badge @model
+  @auth(rules: [{ allow: public, operations: [read] }]) {
+  id: ID!
+  name: String!
+  description: String
+  image: String
+  category: BadgeCategory!
+  levels: [BadgeLevel] @hasMany(indexName: "byBadge", fields: ["id"])
+  userBadges: [UserBadge] @hasMany(indexName: "byBadge", fields: ["id"])
+  createdBy: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Badge Level
+# -------------------------------
+type BadgeLevel @model {
+  id: ID!
+  level: Int!
+  threshold: Int!
+  name: String!
+  badgeID: ID!
+  badge: Badge @belongsTo(fields: ["badgeID"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# UserBadge
+# -------------------------------
+type UserBadge @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  userId: ID!
+  badgeId: ID!
+  level: Int!
+  achievedAt: AWSDateTime!
+  badge: Badge @belongsTo(fields: ["badgeId"])
+  user: UserProfile @belongsTo(fields: ["userId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# -------------------------------
+# Friendship
+# -------------------------------
+type Friendship @model
+  @auth(rules: [
+    { allow: owner },
+    { allow: private, operations: [read] }
+  ]) {
+  id: ID!
+  requesterId: ID!
+  receiverId: ID!
+  status: FriendshipStatus!
+  requester: UserProfile @belongsTo(fields: ["requesterId"])
+  receiver: UserProfile @belongsTo(fields: ["receiverId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}

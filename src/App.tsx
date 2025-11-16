@@ -31,7 +31,11 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkUserProfile();
+    if (user) {
+      checkUserProfile();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const checkUserProfile = async () => {
@@ -41,13 +45,17 @@ function App() {
     }
 
     try {
+      console.log('Checking profile for user:', user.userId);
+
       // Intentar cargar el perfil del usuario
-      const { data: profiles } = await client.models.UserProfile.list({
+      const response = await client.models.UserProfile.list({
         filter: { userId: { eq: user.userId } }
       });
 
-      if (profiles && profiles.length > 0) {
-        setUserProfile(profiles[0]);
+      console.log('Profile response:', response);
+
+      if (response.data && response.data.length > 0) {
+        setUserProfile(response.data[0]);
         setIsAgeVerified(true);
       } else {
         // No existe perfil, necesita verificación de edad
@@ -55,6 +63,7 @@ function App() {
       }
     } catch (error) {
       console.error('Error checking profile:', error);
+      // Si hay error, asumimos que no hay perfil
       setIsAgeVerified(false);
     } finally {
       setLoading(false);
@@ -62,10 +71,15 @@ function App() {
   };
 
   const handleAgeVerified = async (birthdate: Date, additionalData: any) => {
-    if (!user) return;
+    if (!user) {
+      console.error('No user found');
+      return;
+    }
 
     try {
-      const { data } = await client.models.UserProfile.create({
+      console.log('Creating profile for user:', user.userId);
+
+      const profileData = {
         userId: user.userId,
         username: user.username || user.signInDetails?.loginId?.split('@')[0] || 'user',
         email: user.signInDetails?.loginId || '',
@@ -78,10 +92,16 @@ function App() {
         venuesAdded: 0,
         lastSevenDaysTastings: 0,
         lastSevenDaysVenues: 0,
-      });
+      };
 
-      if (data) {
-        setUserProfile(data);
+      console.log('Profile data to create:', profileData);
+
+      const response = await client.models.UserProfile.create(profileData);
+
+      console.log('Profile created:', response);
+
+      if (response.data) {
+        setUserProfile(response.data);
         setIsAgeVerified(true);
       }
     } catch (error) {
@@ -90,22 +110,28 @@ function App() {
     }
   };
 
+  const refreshUserProfile = async () => {
+    if (user) {
+      await checkUserProfile();
+    }
+  };
+
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <Home userProfile={userProfile} />;
+        return <Home userProfile={userProfile} onRefresh={refreshUserProfile} />;
       case 'profile':
-        return <Profile userProfile={userProfile} />;
+        return <Profile userProfile={userProfile} onUpdate={refreshUserProfile} />;
       case 'friends':
-        return <Friends />;
+        return <Friends userId={user?.userId} />;
       case 'top-rated':
         return <TopRated />;
       case 'add-tasting':
-        return <AddTasting />;
+        return <AddTasting userId={user?.userId} onSuccess={refreshUserProfile} />;
       case 'search':
         return <Search />;
       default:
-        return <Home userProfile={userProfile} />;
+        return <Home userProfile={userProfile} onRefresh={refreshUserProfile} />;
     }
   };
 

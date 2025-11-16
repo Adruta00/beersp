@@ -1,222 +1,148 @@
-// Enums
-export enum BeerStyle {
-  LAGER = 'Lager',
-  IPA = 'IPA',
-  APA = 'APA',
-  STOUT = 'Stout',
-  SAISON = 'Saison',
-  PORTER = 'Porter',
-  PILSNER = 'Pilsner',
-  WEISSBIER = 'Weissbier',
-  SOUR_ALE = 'Sour Ale',
-  LAMBIC = 'Lambic',
-  AMBER_ALE = 'Amber Ale',
-}
+import { type ClientSchema, a, defineData } from "@aws-amplify/backend";
 
-export enum BeerColor {
-  LIGHT_GOLD = 'Dorado Claro',
-  GOLDEN_YELLOW = 'Amarillo Dorado',
-  LIGHT_AMBER = 'Ámbar Claro',
-  DARK_BROWN = 'Marrón Oscuro',
-  OPAQUE_BLACK = 'Negro Opaco',
-}
+const schema = a.schema({
+  // User Profile (extiende Cognito)
+  UserProfile: a
+    .model({
+      userId: a.string().required(),
+      username: a.string().required(),
+      email: a.email().required(),
+      birthdate: a.date().required(),
+      fullName: a.string(),
+      lastName: a.string(),
+      photo: a.string(),
+      location: a.string(),
+      bio: a.string(),
+      gender: a.string(),
+      tastingsCount: a.integer().default(0),
+      venuesAdded: a.integer().default(0),
+      lastSevenDaysTastings: a.integer().default(0),
+      lastSevenDaysVenues: a.integer().default(0),
+    })
+    .authorization((allow) => [
+      allow.owner().to(['read', 'update', 'delete']),
+      allow.authenticated().to(['read', 'create']),
+      allow.publicApiKey().to(['read']),
+    ]),
 
-export enum BeerSize {
-  PINT = 'Pinta',
-  HALF_PINT = 'Media Pinta',
-  THIRD = 'Tercio',
-}
+  // Beer
+  Beer: a
+    .model({
+      name: a.string().required(),
+      style: a.string().required(),
+      country: a.string().required(),
+      description: a.string(),
+      photo: a.string(),
+      alcoholPercentage: a.float(),
+      ibu: a.integer(),
+      color: a.string().required(),
+      averageRating: a.float().default(0),
+      ratingsCount: a.integer().default(0),
+      addedById: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(['create', 'read']),
+      allow.publicApiKey().to(['read']),
+    ]),
 
-export enum BeerFormat {
-  DRAFT = 'Barril',
-  CAN = 'Lata',
-  BOTTLE = 'Botella',
-}
+  // Venue (Local/Cervecería)
+  Venue: a
+    .model({
+      name: a.string().required(),
+      address: a.string().required(),
+      city: a.string(),
+      country: a.string(),
+      latitude: a.float(),
+      longitude: a.float(),
+      likes: a.integer().default(0),
+      addedById: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(['create', 'read']),
+      allow.publicApiKey().to(['read']),
+    ]),
 
-export enum FriendshipStatus {
-  PENDING = 'PENDING',
-  ACCEPTED = 'ACCEPTED',
-  REJECTED = 'REJECTED',
-}
+  // Tasting (Degustación)
+  Tasting: a
+    .model({
+      userId: a.string().required(),
+      beerId: a.string().required(),
+      venueId: a.string(),
+      rating: a.float(),
+      size: a.string().required(),
+      format: a.string().required(),
+      consumptionCountry: a.string().required(),
+      consumptionDate: a.datetime().required(),
+      liked: a.boolean().default(false),
+    })
+    .authorization((allow) => [
+      allow.owner().to(['read', 'create', 'update', 'delete']),
+      allow.authenticated().to(['read']),
+      allow.publicApiKey().to(['read']),
+    ]),
 
-export enum BadgeCategory {
-  TASTINGS = 'TASTINGS',
-  COUNTRIES = 'COUNTRIES',
-  STYLES = 'STYLES',
-  VENUES = 'VENUES',
-  COMMENTS = 'COMMENTS',
-}
+  // Badge (Galardón)
+  Badge: a
+    .model({
+      name: a.string().required(),
+      description: a.string(),
+      image: a.string(),
+      category: a.string().required(),
+      levels: a.json().required(),
+      createdBy: a.string(),
+    })
+    .authorization((allow) => [
+      allow.authenticated().to(['read']),
+      allow.publicApiKey().to(['read']),
+    ]),
 
-// Interfaces
-export interface UserProfile {
-  id: string;
-  userId: string;
-  username: string;
-  email: string;
-  birthdate: string;
-  fullName?: string;
-  lastName?: string;
-  photo?: string;
-  location?: string;
-  bio?: string;
-  gender?: string;
-  tastingsCount: number;
-  venuesAdded: number;
-  lastSevenDaysTastings: number;
-  lastSevenDaysVenues: number;
-  createdAt: string;
-  updatedAt: string;
-}
+  // UserBadge (Galardón del Usuario)
+  UserBadge: a
+    .model({
+      userId: a.string().required(),
+      badgeId: a.string().required(),
+      level: a.integer().required(),
+      achievedAt: a.datetime().required(),
+    })
+    .authorization((allow) => [
+      allow.owner().to(['read', 'create']),
+      allow.authenticated().to(['read']),
+      allow.publicApiKey().to(['read']),
+    ]),
 
-export interface Beer {
-  id: string;
-  name: string;
-  style: BeerStyle;
-  country: string;
-  description?: string;
-  photo?: string;
-  alcoholPercentage?: number;
-  ibu?: number;
-  color: BeerColor;
-  averageRating: number;
-  ratingsCount: number;
-  addedById?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  // Friendship (Amistad)
+  Friendship: a
+    .model({
+      requesterId: a.string().required(),
+      receiverId: a.string().required(),
+      status: a.string().required(),
+    })
+    .authorization((allow) => [
+      allow.owner().to(['read', 'create', 'update', 'delete']),
+      allow.authenticated().to(['read']),
+    ]),
 
-export interface Venue {
-  id: string;
-  name: string;
-  address: string;
-  city?: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  likes: number;
-  addedById?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  // Comment (Comentario)
+  Comment: a
+    .model({
+      tastingId: a.string().required(),
+      authorId: a.string().required(),
+      content: a.string().required(),
+    })
+    .authorization((allow) => [
+      allow.owner().to(['read', 'create', 'update', 'delete']),
+      allow.authenticated().to(['read']),
+    ]),
+});
 
-export interface Tasting {
-  id: string;
-  userId: string;
-  beerId: string;
-  venueId?: string;
-  rating?: number;
-  size: BeerSize;
-  format: BeerFormat;
-  consumptionCountry: string;
-  consumptionDate: string;
-  liked: boolean;
-  beer?: Beer;
-  venue?: Venue;
-  user?: UserProfile;
-  createdAt: string;
-  updatedAt: string;
-}
+export type Schema = ClientSchema<typeof schema>;
 
-export interface Badge {
-  id: string;
-  name: string;
-  description?: string;
-  image?: string;
-  category: BadgeCategory;
-  levels: BadgeLevel[];
-  createdBy?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface BadgeLevel {
-  level: number;
-  threshold: number;
-  name: string;
-}
-
-export interface UserBadge {
-  id: string;
-  userId: string;
-  badgeId: string;
-  level: number;
-  achievedAt: string;
-  badge?: Badge;
-}
-
-export interface Friendship {
-  id: string;
-  requesterId: string;
-  receiverId: string;
-  status: FriendshipStatus;
-  requester?: UserProfile;
-  receiver?: UserProfile;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface Comment {
-  id: string;
-  tastingId: string;
-  authorId: string;
-  content: string;
-  author?: UserProfile;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Form Types
-export interface RegisterFormData {
-  birthdate: string;
-  username: string;
-  password: string;
-  confirmPassword: string;
-  email: string;
-  fullName?: string;
-  lastName?: string;
-  location?: string;
-  bio?: string;
-}
-
-export interface TastingFormData {
-  beerId?: string;
-  newBeerName?: string;
-  newBeerStyle?: BeerStyle;
-  newBeerCountry?: string;
-  newBeerDescription?: string;
-  newBeerPhoto?: File;
-  newBeerAlcoholPercentage?: number;
-  newBeerIbu?: number;
-  newBeerColor?: BeerColor;
-  rating?: number;
-  size: BeerSize;
-  format: BeerFormat;
-  consumptionCountry: string;
-  venueId?: string;
-  newVenueName?: string;
-  newVenueAddress?: string;
-  liked: boolean;
-}
-
-// API Response Types
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  success: boolean;
-}
-
-export interface PaginatedResponse<T> {
-  items: T[];
-  nextToken?: string;
-  total?: number;
-}
-
-// Activity Feed
-export interface Activity {
-  id: string;
-  type: 'tasting' | 'badge' | 'friend' | 'comment';
-  userId: string;
-  user: UserProfile;
-  data: Tasting | UserBadge | Friendship | Comment;
-  createdAt: string;
-}
+export const data = defineData({
+  schema,
+  authorizationModes: {
+    defaultAuthorizationMode: "userPool",
+    apiKeyAuthorizationMode: {
+      expiresInDays: 30,
+    },
+  },
+});
