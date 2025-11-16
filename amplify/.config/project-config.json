@@ -1,0 +1,14 @@
+{
+  "whyContinueWithGen1": "Prefer not to answer",
+  "projectName": "amplifyvitereacttemp",
+  "version": "3.1",
+  "frontend": "flutter",
+  "flutter": {
+    "config": {
+      "ResDir": "./src"
+    }
+  },
+  "providers": [
+    "awscloudformation"
+  ]
+}
