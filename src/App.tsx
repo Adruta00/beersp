@@ -16,12 +16,13 @@ import Friends from './pages/Friends';
 import TopRated from './pages/TopRated';
 import AddTasting from './pages/AddTasting';
 import Search from './pages/Search';
+import Rankings from './pages/Rankings';
 
 import './App.css';
 
 const client = generateClient<Schema>();
 
-type Page = 'home' | 'profile' | 'friends' | 'top-rated' | 'add-tasting' | 'search';
+export type Page = 'home' | 'profile' | 'friends' | 'top-rated' | 'add-tasting' | 'search' | 'rankings';
 
 function App() {
   const { user, signOut } = useAuthenticator();
@@ -29,6 +30,7 @@ function App() {
   const [isAgeVerified, setIsAgeVerified] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0); // Para forzar actualización
 
   useEffect(() => {
     if (user) {
@@ -47,7 +49,6 @@ function App() {
     try {
       console.log('Checking profile for user:', user.userId);
 
-      // Intentar cargar el perfil del usuario
       const response = await client.models.UserProfile.list({
         filter: { userId: { eq: user.userId } }
       });
@@ -58,12 +59,10 @@ function App() {
         setUserProfile(response.data[0]);
         setIsAgeVerified(true);
       } else {
-        // No existe perfil, necesita verificación de edad
         setIsAgeVerified(false);
       }
     } catch (error) {
       console.error('Error checking profile:', error);
-      // Si hay error, asumimos que no hay perfil
       setIsAgeVerified(false);
     } finally {
       setLoading(false);
@@ -110,32 +109,62 @@ function App() {
     }
   };
 
+  // CORREGIDO: Función centralizada para refrescar perfil
   const refreshUserProfile = async () => {
-    if (user) {
-      await checkUserProfile();
+    if (!user) return;
+    
+    try {
+      const response = await client.models.UserProfile.list({
+        filter: { userId: { eq: user.userId } }
+      });
+
+      if (response.data && response.data.length > 0) {
+        setUserProfile(response.data[0]);
+        setRefreshKey(prev => prev + 1); // Forzar re-render de componentes hijos
+      }
+    } catch (error) {
+      console.error('Error refreshing profile:', error);
     }
+  };
+
+  // NUEVO: Función para navegar y refrescar
+  const handleNavigate = (page: Page) => {
+    setCurrentPage(page);
+    if (page === 'profile' || page === 'home') {
+      refreshUserProfile(); // Refrescar al entrar a estas páginas
+    }
+  };
+
+  // NUEVO: Función para manejar éxito de acciones
+  const handleActionSuccess = async () => {
+    await refreshUserProfile();
   };
 
   const renderPage = () => {
     switch (currentPage) {
       case 'home':
-        return <Home userProfile={userProfile} onRefresh={refreshUserProfile} />;
+        return <Home key={refreshKey} userProfile={userProfile} onRefresh={refreshUserProfile} />;
       case 'profile':
-        return <Profile userProfile={userProfile} onUpdate={refreshUserProfile} />;
+        return <Profile key={refreshKey} userProfile={userProfile} onUpdate={refreshUserProfile} />;
       case 'friends':
-        return <Friends userId={user?.userId} />;
+        return <Friends key={refreshKey} userId={user?.userId} onUpdate={refreshUserProfile} />;
       case 'top-rated':
         return <TopRated />;
       case 'add-tasting':
-        return <AddTasting userId={user?.userId} onSuccess={refreshUserProfile} />;
+        return <AddTasting 
+          userId={user?.userId} 
+          onSuccess={handleActionSuccess}
+          onBack={() => handleNavigate('profile')} 
+        />;
       case 'search':
         return <Search />;
+      case 'rankings':
+        return <Rankings />;
       default:
-        return <Home userProfile={userProfile} onRefresh={refreshUserProfile} />;
+        return <Home key={refreshKey} userProfile={userProfile} onRefresh={refreshUserProfile} />;
     }
   };
 
-  // Mostrar loading mientras se verifica el usuario
   if (loading) {
     return (
       <div className="app loading-screen">
@@ -147,12 +176,10 @@ function App() {
     );
   }
 
-  // Mostrar verificación de edad si no está verificado
   if (!isAgeVerified) {
     return <AgeVerification onVerified={handleAgeVerified} />;
   }
 
-  // Aplicación principal
   return (
     <div className="app">
       <Header
@@ -164,7 +191,7 @@ function App() {
       <div className="app-content">
         <Navigation
           currentPage={currentPage}
-          onNavigate={setCurrentPage}
+          onNavigate={handleNavigate}
         />
 
         <main className="main-content">
