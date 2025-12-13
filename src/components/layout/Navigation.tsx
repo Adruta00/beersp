@@ -1,7 +1,7 @@
 import React from 'react';
 import './Navigation.css';
 
-type Page = 'home' | 'profile' | 'friends' | 'top-rated' | 'add-tasting' | 'search';
+type Page = 'home' | 'profile' | 'friends' | 'top-rated' | 'add-tasting' | 'search' | 'rankings';
 
 interface NavigationProps {
   currentPage: Page;
@@ -13,6 +13,7 @@ const Navigation: React.FC<NavigationProps> = ({ currentPage, onNavigate }) => {
     { id: 'home' as Page, label: 'Inicio', icon: '🏠' },
     { id: 'add-tasting' as Page, label: 'Nueva Degustación', icon: '➕' },
     { id: 'top-rated' as Page, label: 'Top Cervezas', icon: '⭐' },
+    { id: 'rankings' as Page, label: 'Rankings', icon: '🏆' },
     { id: 'search' as Page, label: 'Buscar', icon: '🔍' },
     { id: 'friends' as Page, label: 'Amigos', icon: '👥' },
     { id: 'profile' as Page, label: 'Perfil', icon: '👤' },

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { generateClient } from 'aws-amplify/data';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 import type { Schema } from '../../amplify/data/resource';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
@@ -11,12 +12,21 @@ import './AddTasting.css';
 
 const client = generateClient<Schema>();
 
-const AddTasting: React.FC = () => {
+interface AddTastingProps {
+  userId?: string;
+  onSuccess?: () => void;
+  onBack?: () => void;
+}
+
+const AddTasting: React.FC<AddTastingProps> = ({ onSuccess, onBack }) => {
+  const { user } = useAuthenticator();
   const [step, setStep] = useState<'search' | 'new-beer' | 'tasting'>('search');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedBeer, setSelectedBeer] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   
   const [newBeerData, setNewBeerData] = useState({
     name: '',
@@ -46,13 +56,18 @@ const AddTasting: React.FC = () => {
     if (!searchQuery.trim()) return;
 
     setLoading(true);
+    setErrorMessage('');
     try {
       const response = await client.models.Beer.list({
         filter: { name: { contains: searchQuery } },
       });
       setSearchResults(response.data || []);
+      if (response.data && response.data.length === 0) {
+        setErrorMessage('No se encontraron cervezas con ese nombre');
+      }
     } catch (error) {
       console.error('Error searching beers:', error);
+      setErrorMessage('Error al buscar cervezas');
     } finally {
       setLoading(false);
     }
@@ -61,15 +76,24 @@ const AddTasting: React.FC = () => {
   const handleSelectBeer = (beer: any) => {
     setSelectedBeer(beer);
     setStep('tasting');
+    setErrorMessage('');
   };
 
   const handleCreateNewBeer = () => {
     setNewBeerData({ ...newBeerData, name: searchQuery });
     setStep('new-beer');
+    setErrorMessage('');
   };
 
   const handleSaveNewBeer = async () => {
+    // Validación
+    if (!newBeerData.name || !newBeerData.style || !newBeerData.country || !newBeerData.color) {
+      setErrorMessage('Por favor completa todos los campos obligatorios');
+      return;
+    }
+
     setLoading(true);
+    setErrorMessage('');
     try {
       const response = await client.models.Beer.create({
         name: newBeerData.name,
@@ -79,15 +103,19 @@ const AddTasting: React.FC = () => {
         alcoholPercentage: newBeerData.alcoholPercentage ? parseFloat(newBeerData.alcoholPercentage) : undefined,
         ibu: newBeerData.ibu ? parseInt(newBeerData.ibu) : undefined,
         color: newBeerData.color as any,
+        averageRating: 0,
+        ratingsCount: 0,
+        addedById: user?.userId,
       });
 
       if (response.data) {
         setSelectedBeer(response.data);
         setStep('tasting');
+        setSuccessMessage('Cerveza añadida correctamente');
       }
     } catch (error) {
       console.error('Error creating beer:', error);
-      alert('Error al crear la cerveza');
+      setErrorMessage('Error al crear la cerveza. Por favor intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -107,28 +135,41 @@ const AddTasting: React.FC = () => {
   };
 
   const handleSaveTasting = async () => {
-    if (!selectedBeer) return;
+    if (!selectedBeer || !user) {
+      setErrorMessage('Error: No se pudo identificar el usuario o la cerveza');
+      return;
+    }
+
+    // Validación
+    if (!tastingData.size || !tastingData.format) {
+      setErrorMessage('Por favor completa el tamaño y formato');
+      return;
+    }
 
     setLoading(true);
+    setErrorMessage('');
     try {
       let venueId = tastingData.venueId;
 
       // Crear local si es nuevo
-      if (!venueId && tastingData.newVenueName) {
+      if (!venueId && tastingData.newVenueName && tastingData.newVenueAddress) {
         const venueResponse = await client.models.Venue.create({
           name: tastingData.newVenueName,
           address: tastingData.newVenueAddress,
+          likes: 0,
+          addedById: user.userId,
         });
         if (venueResponse.data) {
           venueId = venueResponse.data.id;
         }
       }
 
-      // Crear degustación
-      await client.models.Tasting.create({
+      // Crear degustación con el userId correcto
+      const tastingResponse = await client.models.Tasting.create({
+        userId: user.userId, // CORREGIDO: usar el userId del usuario autenticado
         beerId: selectedBeer.id,
         venueId: venueId || undefined,
-        rating: tastingData.rating || undefined,
+        rating: tastingData.rating > 0 ? tastingData.rating : undefined,
         size: tastingData.size as any,
         format: tastingData.format as any,
         consumptionCountry: tastingData.consumptionCountry,
@@ -136,14 +177,53 @@ const AddTasting: React.FC = () => {
         liked: tastingData.liked,
       });
 
-      alert('¡Degustación añadida correctamente!');
-      // Resetear formulario
-      resetForm();
+      if (tastingResponse.data) {
+        // Actualizar estadísticas del usuario
+        await updateUserStats();
+        
+        setSuccessMessage('¡Degustación añadida correctamente!');
+        
+        // Esperar 2 segundos y resetear
+        setTimeout(() => {
+          resetForm();
+          if (onSuccess) {
+            onSuccess();
+          }
+        }, 2000);
+      }
     } catch (error) {
       console.error('Error saving tasting:', error);
-      alert('Error al guardar la degustación');
+      setErrorMessage('Error al guardar la degustación. Por favor intenta de nuevo.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateUserStats = async () => {
+    if (!user) return;
+    
+    try {
+      // Obtener perfil actual
+      const profileResponse = await client.models.UserProfile.list({
+        filter: { userId: { eq: user.userId } }
+      });
+
+      if (profileResponse.data && profileResponse.data.length > 0) {
+        const profile = profileResponse.data[0];
+        
+        // Actualizar contador de degustaciones
+        await client.models.UserProfile.update({
+          id: profile.id,
+          tastingsCount: (profile.tastingsCount || 0) + 1,
+          lastSevenDaysTastings: (profile.lastSevenDaysTastings || 0) + 1,
+        });
+
+        // NUEVO: Verificar y otorgar galardones
+        const { badgeService } = await import('../services/badgeService');
+        await badgeService.checkAndAwardBadges(user.userId);
+      }
+    } catch (error) {
+      console.error('Error updating user stats:', error);
     }
   };
 
@@ -171,16 +251,34 @@ const AddTasting: React.FC = () => {
       newVenueAddress: '',
       liked: false,
     });
+    setVenueSearchQuery('');
+    setVenueResults([]);
+    setSuccessMessage('');
+    setErrorMessage('');
   };
 
   return (
     <div className="add-tasting-page">
+      {onBack && (
+        <button className="back-button" onClick={onBack}>
+          ← Volver al Inicio
+        </button>
+      )}
+      
       <div className="page-header">
         <h1>Nueva Degustación</h1>
         <p className="page-description">
           Comparte tu experiencia cervecera con la comunidad
         </p>
       </div>
+
+      {successMessage && (
+        <div className="success-message">{successMessage}</div>
+      )}
+
+      {errorMessage && (
+        <div className="error-message">{errorMessage}</div>
+      )}
 
       {/* Paso 1: Buscar Cerveza */}
       {step === 'search' && (
@@ -280,6 +378,7 @@ const AddTasting: React.FC = () => {
               onChange={(e) => setNewBeerData({ ...newBeerData, color: e.target.value })}
               options={BEER_COLORS}
               placeholder="Selecciona un color"
+              required
             />
 
             <Input
@@ -399,7 +498,7 @@ const AddTasting: React.FC = () => {
                     <div
                       key={venue.id}
                       className={`venue-item ${tastingData.venueId === venue.id ? 'selected' : ''}`}
-                      onClick={() => setTastingData({ ...tastingData, venueId: venue.id })}
+                      onClick={() => setTastingData({ ...tastingData, venueId: venue.id, newVenueName: '', newVenueAddress: '' })}
                     >
                       <strong>{venue.name}</strong>
                       <p>{venue.address}</p>
@@ -413,7 +512,7 @@ const AddTasting: React.FC = () => {
                 <Input
                   placeholder="Nombre del local"
                   value={tastingData.newVenueName}
-                  onChange={(e) => setTastingData({ ...tastingData, newVenueName: e.target.value })}
+                  onChange={(e) => setTastingData({ ...tastingData, newVenueName: e.target.value, venueId: '' })}
                 />
                 <Input
                   placeholder="Dirección"
