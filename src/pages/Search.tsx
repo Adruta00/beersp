@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 import Card from '../components/common/Card';
@@ -18,46 +18,83 @@ const Search: React.FC = () => {
   const [beerResults, setBeerResults] = useState<any[]>([]);
   const [userResults, setUserResults] = useState<any[]>([]);
   const [venueResults, setVenueResults] = useState<any[]>([]);
+  const [allBeers, setAllBeers] = useState<any[]>([]);
+  const [allVenues, setAllVenues] = useState<any[]>([]);
+
+  // Cargar todas las cervezas y locales al montar el componente
+  useEffect(() => {
+    loadAllData();
+  }, []);
+
+  const loadAllData = async () => {
+    try {
+      // Cargar todas las cervezas
+      const beersResponse = await client.models.Beer.list({ limit: 1000 });
+      setAllBeers(beersResponse.data || []);
+
+      // Cargar todos los locales
+      const venuesResponse = await client.models.Venue.list({ limit: 1000 });
+      setAllVenues(venuesResponse.data || []);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
+    if (!query.trim() && category !== 'all') {
+      // Si no hay query, mostrar todo en la categoría seleccionada
+      if (category === 'beers') {
+        setBeerResults(allBeers);
+        setUserResults([]);
+        setVenueResults([]);
+      } else if (category === 'venues') {
+        setVenueResults(allVenues);
+        setBeerResults([]);
+        setUserResults([]);
+      }
+      return;
+    }
 
     setLoading(true);
     try {
+      const searchTerm = query.toLowerCase().trim();
+
       if (category === 'all' || category === 'beers') {
-        const beersResponse = await client.models.Beer.list({
-          filter: {
-            or: [
-              { name: { contains: query } },
-              { country: { contains: query } },
-            ],
-          },
-        });
-        setBeerResults(beersResponse.data || []);
+        // Buscar en memoria las cervezas que coincidan
+        const filteredBeers = allBeers.filter(beer =>
+          beer.name.toLowerCase().includes(searchTerm) ||
+          beer.country.toLowerCase().includes(searchTerm) ||
+          beer.style.toLowerCase().includes(searchTerm)
+        );
+        setBeerResults(filteredBeers);
+      } else {
+        setBeerResults([]);
       }
 
       if (category === 'all' || category === 'users') {
         const usersResponse = await client.models.UserProfile.list({
           filter: {
             or: [
-              { username: { contains: query } },
-              { fullName: { contains: query } },
+              { username: { contains: searchTerm } },
+              { fullName: { contains: searchTerm } },
             ],
           },
         });
         setUserResults(usersResponse.data || []);
+      } else {
+        setUserResults([]);
       }
 
       if (category === 'all' || category === 'venues') {
-        const venuesResponse = await client.models.Venue.list({
-          filter: {
-            or: [
-              { name: { contains: query } },
-              { city: { contains: query } },
-            ],
-          },
-        });
-        setVenueResults(venuesResponse.data || []);
+        // Buscar en memoria los locales que coincidan
+        const filteredVenues = allVenues.filter(venue =>
+          venue.name.toLowerCase().includes(searchTerm) ||
+          (venue.city && venue.city.toLowerCase().includes(searchTerm)) ||
+          (venue.address && venue.address.toLowerCase().includes(searchTerm))
+        );
+        setVenueResults(filteredVenues);
+      } else {
+        setVenueResults([]);
       }
     } catch (error) {
       console.error('Error searching:', error);
@@ -71,6 +108,15 @@ const Search: React.FC = () => {
     setBeerResults([]);
     setUserResults([]);
     setVenueResults([]);
+  };
+
+  const showAll = () => {
+    if (category === 'beers' || category === 'all') {
+      setBeerResults(allBeers);
+    }
+    if (category === 'venues' || category === 'all') {
+      setVenueResults(allVenues);
+    }
   };
 
   const totalResults = beerResults.length + userResults.length + venueResults.length;
@@ -102,7 +148,10 @@ const Search: React.FC = () => {
             >
               Buscar
             </Button>
-            {query && (
+            <Button variant="secondary" onClick={showAll}>
+              Ver Todo
+            </Button>
+            {(query || totalResults > 0) && (
               <Button variant="secondary" onClick={clearSearch}>
                 Limpiar
               </Button>
@@ -120,7 +169,7 @@ const Search: React.FC = () => {
               className={`category-tab ${category === 'beers' ? 'active' : ''}`}
               onClick={() => setCategory('beers')}
             >
-              Cervezas
+              Cervezas ({allBeers.length})
             </button>
             <button
               className={`category-tab ${category === 'users' ? 'active' : ''}`}
@@ -132,15 +181,28 @@ const Search: React.FC = () => {
               className={`category-tab ${category === 'venues' ? 'active' : ''}`}
               onClick={() => setCategory('venues')}
             >
-              Locales
+              Locales ({allVenues.length})
             </button>
           </div>
         </div>
       </Card>
 
-      {query && totalResults > 0 && (
+      {totalResults > 0 && (
         <div className="results-summary">
           <span>{totalResults} resultados encontrados</span>
+        </div>
+      )}
+
+      {!query && totalResults === 0 && !loading && (
+        <div className="empty-state-container">
+          <div className="empty-state">
+            <div className="empty-state-icon">🔍</div>
+            <h3>Busca o explora nuestro catálogo</h3>
+            <p>Tenemos {allBeers.length} cervezas y {allVenues.length} locales disponibles</p>
+            <Button variant="primary" onClick={showAll} style={{ marginTop: '1rem' }}>
+              Ver Todas las Cervezas
+            </Button>
+          </div>
         </div>
       )}
 
@@ -154,7 +216,6 @@ const Search: React.FC = () => {
         </div>
       )}
 
-      {/* Resultados de Cervezas */}
       {(category === 'all' || category === 'beers') && beerResults.length > 0 && (
         <Card title={`Cervezas (${beerResults.length})`} className="results-section">
           <div className="results-grid">
@@ -170,6 +231,11 @@ const Search: React.FC = () => {
                 <div className="result-content">
                   <h4>{beer.name}</h4>
                   <p className="result-meta">{beer.style} • {beer.country}</p>
+                  {beer.description && (
+                    <p className="text-xs text-secondary" style={{ marginTop: '0.5rem' }}>
+                      {beer.description.substring(0, 80)}...
+                    </p>
+                  )}
                   {beer.averageRating > 0 && (
                     <div className="result-rating">
                       <Rating value={beer.averageRating} readonly size="small" />
@@ -185,7 +251,6 @@ const Search: React.FC = () => {
         </Card>
       )}
 
-      {/* Resultados de Usuarios */}
       {(category === 'all' || category === 'users') && userResults.length > 0 && (
         <Card title={`Usuarios (${userResults.length})`} className="results-section">
           <div className="results-list">
@@ -221,7 +286,6 @@ const Search: React.FC = () => {
         </Card>
       )}
 
-      {/* Resultados de Locales */}
       {(category === 'all' || category === 'venues') && venueResults.length > 0 && (
         <Card title={`Locales (${venueResults.length})`} className="results-section">
           <div className="results-list">

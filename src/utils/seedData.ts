@@ -1,10 +1,10 @@
-// src/utils/seedData.ts
+// src/utils/seedData.ts - INTEGRADO COMPLETO
 import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 
 const client = generateClient<Schema>();
 
-// Usuarios de ejemplo con IDs únicos
+// Usuarios de ejemplo
 const SAMPLE_USERS = [
   {
     userId: 'sample-user-maria-001',
@@ -135,374 +135,256 @@ const SAMPLE_USERS = [
     venuesAdded: 18,
     lastSevenDaysTastings: 8,
     lastSevenDaysVenues: 3
-  },
-  {
-    userId: 'sample-user-pablo-011',
-    username: 'pabloUPM',
-    email: 'pablo@ejemploUPM.com',
-    birthdate: '2003-07-16',
-    fullName: 'Pablo Lopez',
-    location: 'Madrid, España',
-    bio: 'Coleccionista de cervezas nacionales 🍻',
-    tastingsCount: 95,
-    venuesAdded: 10,
-    lastSevenDaysTastings: 4,
-    lastSevenDaysVenues: 2
-  },
-  {
-    userId: 'sample-user-adri-012',
-    username: 'adriUPM',
-    email: 'adri@ejemploUPM.com',
-    birthdate: '2003-09-13',
-    fullName: 'Adrian Fernandez De la Rosa',
-    location: 'Madrid, España',
-    bio: 'Coleccionista de cervezas asturianas 🍻',
-    tastingsCount: 95,
-    venuesAdded: 10,
-    lastSevenDaysTastings: 4,
-     lastSevenDaysVenues: 2
-  },
-  {
-     userId: 'sample-user-farid-013',
-    username: 'faridUPM',
-    email: 'farid@ejemploUPM.com',
-    birthdate: '2003-10-23',
-    fullName: 'Farid Gonzalez',
-    location: 'Madrid, España',
-    bio: 'Coleccionista de cervezas de pontevedra 🍻',
-    tastingsCount: 95,
-    venuesAdded: 10,
-    lastSevenDaysTastings: 4,
-  },
-  {
-     userId: 'sample-user-fernan-014',
-    username: 'fernanUPM',
-    email: 'fernan@ejemploUPM.com',
-    birthdate: '2003-02-07',
-    fullName: 'Fernan Alvarez',
-    location: 'Madrid, España',
-    bio: 'Coleccionista de cervezas turisticas 🍻',
-    tastingsCount: 95,
-    venuesAdded: 10,
-    lastSevenDaysTastings: 4,
-  },
-];
-
-// Datos de ejemplo de cervezas
-const SAMPLE_BEERS = [
-  {
-    name: "Estrella Galicia",
-    style: "LAGER",
-    country: "ES",
-    description: "Cerveza rubia tipo Pilsen de gran calidad y sabor equilibrado",
-    alcoholPercentage: 5.5,
-    ibu: 25,
-    color: "GOLDEN_YELLOW"
-  },
-  {
-    name: "Alhambra Reserva 1925",
-    style: "LAGER",
-    country: "ES",
-    description: "Cerveza especial con carácter y personalidad única",
-    alcoholPercentage: 6.4,
-    ibu: 30,
-    color: "LIGHT_AMBER"
-  },
-  {
-    name: "Voll-Damm",
-    style: "LAGER",
-    country: "ES",
-    description: "Cerveza doble malta de gran cuerpo y sabor intenso",
-    alcoholPercentage: 7.2,
-    ibu: 28,
-    color: "DARK_BROWN"
-  },
-  {
-    name: "La Virgen IPA",
-    style: "IPA",
-    country: "ES",
-    description: "IPA artesanal madrileña con intenso aroma a lúpulo",
-    alcoholPercentage: 6.5,
-    ibu: 65,
-    color: "LIGHT_AMBER"
-  },
-  {
-    name: "Guinness Draught",
-    style: "STOUT",
-    country: "GB",
-    description: "Stout irlandesa icónica con notas de café y chocolate",
-    alcoholPercentage: 4.2,
-    ibu: 45,
-    color: "OPAQUE_BLACK"
-  },
-  {
-    name: "Paulaner Weissbier",
-    style: "WEISSBIER",
-    country: "DE",
-    description: "Cerveza de trigo alemana tradicional con carácter afrutado",
-    alcoholPercentage: 5.5,
-    ibu: 15,
-    color: "GOLDEN_YELLOW"
-  },
-  {
-    name: "Chimay Blue",
-    style: "PORTER",
-    country: "BE",
-    description: "Cerveza trapense belga oscura y compleja",
-    alcoholPercentage: 9.0,
-    ibu: 35,
-    color: "DARK_BROWN"
-  },
-  {
-    name: "Brewdog Punk IPA",
-    style: "IPA",
-    country: "GB",
-    description: "IPA británica moderna con carácter rebelde",
-    alcoholPercentage: 5.6,
-    ibu: 60,
-    color: "LIGHT_AMBER"
-  },
-  {
-    name: "Cruzcampo",
-    style: "LAGER",
-    country: "ES",
-    description: "Cerveza andaluza refrescante y ligera",
-    alcoholPercentage: 4.8,
-    ibu: 20,
-    color: "LIGHT_GOLD"
-  },
-  {
-    name: "Mahou 5 Estrellas",
-    style: "LAGER",
-    country: "ES",
-    description: "Lager madrileña clásica de sabor equilibrado",
-    alcoholPercentage: 5.5,
-    ibu: 22,
-    color: "GOLDEN_YELLOW"
   }
 ];
 
-// Datos de ejemplo de locales
-const SAMPLE_VENUES = [
-  {
-    name: "La Cervecería del Barrio",
-    address: "Calle Mayor, 15",
-    city: "Madrid",
-    country: "ES"
-  },
-  {
-    name: "Brew House Barcelona",
-    address: "Carrer de la Diputació, 234",
-    city: "Barcelona",
-    country: "ES"
-  },
-  {
-    name: "El Rincón de la Birra",
-    address: "Calle San Vicente, 8",
-    city: "Sevilla",
-    country: "ES"
-  },
-  {
-    name: "Craft Beer Corner",
-    address: "Avenida de la Constitución, 45",
-    city: "Valencia",
-    country: "ES"
-  },
-  {
-    name: "The Beer Garden",
-    address: "Plaza del Sol, 3",
-    city: "Madrid",
-    country: "ES"
-  }
+// IMPORTAR CERVEZAS Y LOCALES DEL services/seedData.ts
+// Estas son TODAS las cervezas que deben aparecer en la web
+const INITIAL_BEERS = [
+  // --- ESPAÑA ---
+  { name: "Alhambra Reserva 1925", style: "LAGER", country: "ES", color: "GOLDEN_YELLOW", alcoholPercentage: 6.4, ibu: 25, description: "Iconica lager premium de Granada, intensa y con cuerpo." },
+  { name: "Mahou 5 Estrellas", style: "LAGER", country: "ES", color: "GOLDEN_YELLOW", alcoholPercentage: 5.5, ibu: 27, description: "El sabor clásico de Madrid, equilibrada y refrescante." },
+  { name: "Estrella Galicia Especial", style: "LAGER", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 5.5, ibu: 25, description: "Cerveza gallega de sabor lupulado y refrescante." },
+  { name: "Estrella Damm", style: "LAGER", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 5.4, ibu: 21, description: "La cerveza del mediterráneo, elaborada con arroz." },
+  { name: "Cruzcampo Gran Reserva", style: "LAGER", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 6.4, ibu: 25, description: "Lager tostada de larga maduración." },
+  { name: "San Miguel Especial", style: "LAGER", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 5.4, ibu: 28, description: "Cerveza internacional española con notas de cereal." },
+  { name: "Voll-Damm Doble Malta", style: "AMBER_ALE", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 7.2, ibu: 35, description: "Märzenbier de cuerpo intenso y sabor tostado." },
+  { name: "Ambar Export", style: "LAGER", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 7.0, ibu: 28, description: "Cerveza con tres maltas, robusta y sabrosa." },
+  { name: "1906 Reserva Especial", style: "LAGER", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 6.5, ibu: 30, description: "La milnueve, tostada con notas de caramelo y café." },
+  { name: "1906 Red Vintage", style: "AMBER_ALE", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 8.0, ibu: 28, description: "La colorada, intensa y equilibrada." },
+  { name: "1906 Black Coupage", style: "PORTER", country: "ES", color: "OPAQUE_BLACK", alcoholPercentage: 7.2, ibu: 35, description: "Cerveza negra con aromas de café y chocolate." },
+  { name: "Moritz 7", style: "LAGER", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 5.5, ibu: 25, description: "Premium lager de Barcelona 100% malta." },
+  { name: "La Virgen Madrid Lager", style: "LAGER", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 5.2, ibu: 22, description: "Lager artesana madrileña, fresca y sin filtrar." },
+  { name: "La Virgen Jamonera", style: "AMBER_ALE", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 5.5, ibu: 20, description: "Amber Ale tostada ideal para acompañar embutidos." },
+  { name: "La Virgen 360", style: "APA", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 35, description: "Pale Ale muy aromática y lupulada." },
+  { name: "Arriaca IPA", style: "IPA", country: "ES", color: "LIGHT_AMBER", alcoholPercentage: 6.9, ibu: 60, description: "IPA artesana de Guadalajara potente y cítrica." },
+  { name: "Dougall's IPA 4", style: "IPA", country: "ES", color: "LIGHT_GOLD", alcoholPercentage: 6.0, ibu: 55, description: "IPA cántabra de referencia, muy bebible." },
+  { name: "Basqueland Imparable", style: "IPA", country: "ES", color: "GOLDEN_YELLOW", alcoholPercentage: 6.8, ibu: 62, description: "West Coast IPA vasca muy premiada." },
+
+  // --- ALEMANIA ---
+  { name: "Paulaner Hefe-Weissbier", style: "WEISSBIER", country: "DE", color: "GOLDEN_YELLOW", alcoholPercentage: 5.5, ibu: 12, description: "La cerveza de trigo número 1 en Alemania." },
+  { name: "Paulaner Salvator", style: "LAGER", country: "DE", color: "DARK_BROWN", alcoholPercentage: 7.9, ibu: 28, description: "Doppelbock fuerte y maltosa." },
+  { name: "Erdinger Weissbier", style: "WEISSBIER", country: "DE", color: "GOLDEN_YELLOW", alcoholPercentage: 5.3, ibu: 13, description: "Clásica de trigo bávara." },
+  { name: "Erdinger Dunkel", style: "WEISSBIER", country: "DE", color: "DARK_BROWN", alcoholPercentage: 5.3, ibu: 14, description: "Trigo oscura con notas tostadas." },
+  { name: "Franziskaner Weissbier", style: "WEISSBIER", country: "DE", color: "GOLDEN_YELLOW", alcoholPercentage: 5.0, ibu: 12, description: "Suave, con notas de plátano y clavo." },
+  { name: "Weihenstephaner Hefe Weissbier", style: "WEISSBIER", country: "DE", color: "GOLDEN_YELLOW", alcoholPercentage: 5.4, ibu: 14, description: "De la cervecería más antigua del mundo." },
+  { name: "Augustiner Helles", style: "LAGER", country: "DE", color: "LIGHT_GOLD", alcoholPercentage: 5.2, ibu: 18, description: "La lager favorita de Múnich." },
+  { name: "Beck's", style: "PILSNER", country: "DE", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 33, description: "Pilsner del norte, seca y amarga." },
+  { name: "Bitburger Premium Pils", style: "PILSNER", country: "DE", color: "LIGHT_GOLD", alcoholPercentage: 4.8, ibu: 32, description: "La pilsner de grifo más famosa." },
+  { name: "Krombacher Pils", style: "PILSNER", country: "DE", color: "LIGHT_GOLD", alcoholPercentage: 4.8, ibu: 24, description: "Pilsner con agua de manantial de roca." },
+
+  // --- BÉLGICA ---
+  { name: "Chimay Azul", style: "AMBER_ALE", country: "BE", color: "DARK_BROWN", alcoholPercentage: 9.0, ibu: 35, description: "Trapense oscura, compleja y afrutada." },
+  { name: "Chimay Roja", style: "AMBER_ALE", country: "BE", color: "LIGHT_AMBER", alcoholPercentage: 7.0, ibu: 19, description: "Dubbel trapense con notas de albaricoque." },
+  { name: "Chimay Triple", style: "AMBER_ALE", country: "BE", color: "GOLDEN_YELLOW", alcoholPercentage: 8.0, ibu: 38, description: "Tripel seca y lupulada." },
+  { name: "Duvel", style: "AMBER_ALE", country: "BE", color: "GOLDEN_YELLOW", alcoholPercentage: 8.5, ibu: 32, description: "Strong Ale de referencia, burbujeante." },
+  { name: "Westmalle Tripel", style: "AMBER_ALE", country: "BE", color: "GOLDEN_YELLOW", alcoholPercentage: 9.5, ibu: 36, description: "La madre de todas las Tripels." },
+  { name: "Westmalle Dubbel", style: "AMBER_ALE", country: "BE", color: "DARK_BROWN", alcoholPercentage: 7.0, ibu: 24, description: "Dubbel oscura y maltosa." },
+  { name: "Orval", style: "SAISON", country: "BE", color: "LIGHT_AMBER", alcoholPercentage: 6.2, ibu: 32, description: "Trapense única con levadura Brettanomyces." },
+  { name: "Rochefort 10", style: "AMBER_ALE", country: "BE", color: "DARK_BROWN", alcoholPercentage: 11.3, ibu: 27, description: "Quadrupel muy fuerte y compleja." },
+  { name: "Leffe Blonde", style: "AMBER_ALE", country: "BE", color: "GOLDEN_YELLOW", alcoholPercentage: 6.6, ibu: 20, description: "De abadía, dulce y especiada." },
+  { name: "Hoegaarden", style: "WEISSBIER", country: "BE", color: "LIGHT_GOLD", alcoholPercentage: 4.9, ibu: 15, description: "Witbier original con cilantro y naranja." },
+  { name: "Stella Artois", style: "PILSNER", country: "BE", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 24, description: "Lager premium belga internacional." },
+  { name: "Delirium Tremens", style: "AMBER_ALE", country: "BE", color: "GOLDEN_YELLOW", alcoholPercentage: 8.5, ibu: 24, description: "Famosa por el elefante rosa y su fuerza." },
+
+  // --- REINO UNIDO E IRLANDA ---
+  { name: "Guinness Draught", style: "STOUT", country: "IE", color: "OPAQUE_BLACK", alcoholPercentage: 4.2, ibu: 45, description: "La stout más icónica, cremosa y tostada." },
+  { name: "Guinness Extra Stout", style: "STOUT", country: "IE", color: "OPAQUE_BLACK", alcoholPercentage: 5.6, ibu: 40, description: "Versión más carbonatada y fuerte." },
+  { name: "Fuller's London Pride", style: "AMBER_ALE", country: "GB", color: "LIGHT_AMBER", alcoholPercentage: 4.7, ibu: 30, description: "La bitter inglesa por excelencia." },
+  { name: "BrewDog Punk IPA", style: "IPA", country: "GB", color: "LIGHT_GOLD", alcoholPercentage: 5.4, ibu: 35, description: "IPA moderna escocesa, explosión tropical." },
+  { name: "BrewDog Elvis Juice", style: "IPA", country: "GB", color: "LIGHT_AMBER", alcoholPercentage: 6.5, ibu: 40, description: "IPA infusionada con pomelo." },
+
+  // --- ESTADOS UNIDOS ---
+  { name: "Sierra Nevada Pale Ale", style: "APA", country: "US", color: "LIGHT_AMBER", alcoholPercentage: 5.6, ibu: 38, description: "La APA que inició la revolución artesanal." },
+  { name: "Lagunitas IPA", style: "IPA", country: "US", color: "LIGHT_GOLD", alcoholPercentage: 6.2, ibu: 51, description: "IPA de California icónica y balanceada." },
+  { name: "Stone IPA", style: "IPA", country: "US", color: "LIGHT_AMBER", alcoholPercentage: 6.9, ibu: 71, description: "West Coast IPA clásica y amarga." },
+  { name: "Samuel Adams Boston Lager", style: "LAGER", country: "US", color: "LIGHT_AMBER", alcoholPercentage: 5.0, ibu: 30, description: "Vienna lager americana compleja." },
+  { name: "Brooklyn Lager", style: "LAGER", country: "US", color: "LIGHT_AMBER", alcoholPercentage: 5.2, ibu: 33, description: "Amber Lager estilo pre-prohibición." },
+  { name: "Goose Island IPA", style: "IPA", country: "US", color: "LIGHT_AMBER", alcoholPercentage: 5.9, ibu: 55, description: "IPA de Chicago, floral y cítrica." },
+  { name: "Budweiser", style: "LAGER", country: "US", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 12, description: "La King of Beers, lager adjunta." },
+  { name: "Blue Moon Belgian White", style: "WEISSBIER", country: "US", color: "LIGHT_GOLD", alcoholPercentage: 5.4, ibu: 9, description: "Trigo estilo belga con naranja." },
+
+  // --- REPÚBLICA CHECA ---
+  { name: "Pilsner Urquell", style: "PILSNER", country: "CZ", color: "LIGHT_GOLD", alcoholPercentage: 4.4, ibu: 40, description: "La primera pilsner dorada del mundo (1842)." },
+  { name: "Budweiser Budvar", style: "LAGER", country: "CZ", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 22, description: "La auténtica lager de České Budějovice." },
+  { name: "Staropramen", style: "LAGER", country: "CZ", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 27, description: "La cerveza de Praga." },
+
+  // --- MÉXICO ---
+  { name: "Corona Extra", style: "LAGER", country: "MX", color: "LIGHT_GOLD", alcoholPercentage: 4.5, ibu: 18, description: "La cerveza mexicana más famosa del mundo." },
+  { name: "Modelo Especial", style: "PILSNER", country: "MX", color: "LIGHT_GOLD", alcoholPercentage: 4.4, ibu: 18, description: "Pilsner rica y completa." },
+  { name: "Negra Modelo", style: "LAGER", country: "MX", color: "DARK_BROWN", alcoholPercentage: 5.3, ibu: 19, description: "Munich Dunkel estilo vienes." },
+  { name: "Dos Equis Lager", style: "LAGER", country: "MX", color: "LIGHT_GOLD", alcoholPercentage: 4.2, ibu: 10, description: "Suave, maltosa y ligera." },
+  { name: "Tecate", style: "LAGER", country: "MX", color: "LIGHT_GOLD", alcoholPercentage: 4.5, ibu: 14, description: "Cerveza del norte de México." },
+
+  // --- PAÍSES BAJOS ---
+  { name: "Heineken", style: "LAGER", country: "NL", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 19, description: "La botella verde más reconocible del mundo." },
+  { name: "Amstel", style: "LAGER", country: "NL", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 18, description: "Lager holandesa de tradición." },
+  { name: "Grolsch Premium Pilsner", style: "PILSNER", country: "NL", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 28, description: "Con su icónico tapón 'swing-top'." },
+
+  // --- ITALIA ---
+  { name: "Peroni Nastro Azzurro", style: "LAGER", country: "IT", color: "LIGHT_GOLD", alcoholPercentage: 5.1, ibu: 24, description: "Lager italiana de estilo y frescura." },
+  { name: "Birra Moretti", style: "LAGER", country: "IT", color: "LIGHT_GOLD", alcoholPercentage: 4.6, ibu: 18, description: "La cerveza del hombre del bigote." },
+
+  // --- FRANCIA ---
+  { name: "Kronenbourg 1664", style: "LAGER", country: "FR", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 20, description: "La lager premium de Francia." },
+  { name: "1664 Blanc", style: "WEISSBIER", country: "FR", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 15, description: "Trigo con cítricos, muy afrutada." },
+
+  // --- ASIA ---
+  { name: "Asahi Super Dry", style: "LAGER", country: "JP", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 16, description: "Karakuchi: sabor seco y crujiente." },
+  { name: "Sapporo Premium", style: "LAGER", country: "JP", color: "LIGHT_GOLD", alcoholPercentage: 4.9, ibu: 18, description: "La cerveza más antigua de Japón." },
+  { name: "Kirin Ichiban", style: "LAGER", country: "JP", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 19, description: "Solo primera prensa del mosto." },
+  { name: "Tsingtao", style: "LAGER", country: "CN", color: "LIGHT_GOLD", alcoholPercentage: 4.7, ibu: 15, description: "La cerveza más famosa de China." },
+  { name: "Singha", style: "LAGER", country: "TH", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 25, description: "Lager tailandesa original con carácter." },
+  { name: "Tiger Beer", style: "LAGER", country: "SG", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 18, description: "Lager tropical nacida en Singapur." },
+  { name: "Kingfisher Premium", style: "LAGER", country: "IN", color: "LIGHT_GOLD", alcoholPercentage: 4.8, ibu: 18, description: "La cerveza número 1 de la India." },
+
+  // --- LATINOAMÉRICA ---
+  { name: "Quilmes Cristal", style: "LAGER", country: "AR", color: "LIGHT_GOLD", alcoholPercentage: 4.9, ibu: 15, description: "El sabor del encuentro argentino." },
+  { name: "Brahma Chopp", style: "LAGER", country: "BR", color: "LIGHT_GOLD", alcoholPercentage: 4.8, ibu: 10, description: "Lager brasileña muy ligera." },
+  { name: "Cusqueña Dorada", style: "LAGER", country: "PE", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 20, description: "Lager premium de Perú 100% cebada." },
+  { name: "Club Colombia Dorada", style: "LAGER", country: "CO", color: "LIGHT_GOLD", alcoholPercentage: 4.7, ibu: 18, description: "Lager colombiana con orgullo." },
+  { name: "Cristal", style: "LAGER", country: "CL", color: "LIGHT_GOLD", alcoholPercentage: 4.6, ibu: 15, description: "La cerveza de Chile." },
+
+  // --- OCEANIA ---
+  { name: "Foster's", style: "LAGER", country: "AU", color: "LIGHT_GOLD", alcoholPercentage: 4.0, ibu: 12, description: "Famosa internacionalmente como australiana." },
+  { name: "Coopers Pale Ale", style: "APA", country: "AU", color: "LIGHT_GOLD", alcoholPercentage: 4.5, ibu: 22, description: "Sparkling Ale fermentada en botella." },
+
+  // --- OTROS EUROPA ---
+  { name: "Carlsberg Pilsner", style: "PILSNER", country: "DK", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 25, description: "Probablemente la mejor cerveza del mundo." },
+  { name: "Super Bock", style: "LAGER", country: "PT", color: "LIGHT_GOLD", alcoholPercentage: 5.2, ibu: 22, description: "La cerveza más vendida de Portugal." },
+  { name: "Sagres", style: "LAGER", country: "PT", color: "LIGHT_GOLD", alcoholPercentage: 5.0, ibu: 20, description: "Lager portuguesa seca y ligera." }
 ];
 
-// Datos de ejemplo de galardones
-const SAMPLE_BADGES = [
-  {
-    name: "Explorador Cervecero",
-    description: "Prueba diferentes cervezas",
-    category: "TASTINGS",
-    levels: JSON.stringify([
-      { level: 1, threshold: 5, name: "Novato" },
-      { level: 2, threshold: 10, name: "Entusiasta" },
-      { level: 3, threshold: 25, name: "Aficionado" },
-      { level: 4, threshold: 50, name: "Experto" },
-      { level: 5, threshold: 100, name: "Maestro" }
-    ])
-  },
-  {
-    name: "Viajero del Mundo",
-    description: "Prueba cervezas de diferentes países",
-    category: "COUNTRIES",
-    levels: JSON.stringify([
-      { level: 1, threshold: 3, name: "Turista" },
-      { level: 2, threshold: 5, name: "Trotamundos" },
-      { level: 3, threshold: 10, name: "Aventurero" },
-      { level: 4, threshold: 15, name: "Cosmopolita" },
-      { level: 5, threshold: 20, name: "Ciudadano del Mundo" }
-    ])
-  },
-  {
-    name: "Conocedor de Estilos",
-    description: "Prueba diferentes estilos de cerveza",
-    category: "STYLES",
-    levels: JSON.stringify([
-      { level: 1, threshold: 3, name: "Curioso" },
-      { level: 2, threshold: 5, name: "Explorador" },
-      { level: 3, threshold: 8, name: "Conocedor" },
-      { level: 4, threshold: 10, name: "Especialista" },
-      { level: 5, threshold: 11, name: "Sommelier" }
-    ])
-  },
-  {
-    name: "Descubridor de Locales",
-    description: "Visita diferentes cervecerías",
-    category: "VENUES",
-    levels: JSON.stringify([
-      { level: 1, threshold: 3, name: "Visitante" },
-      { level: 2, threshold: 5, name: "Regular" },
-      { level: 3, threshold: 10, name: "Local" },
-      { level: 4, threshold: 20, name: "VIP" },
-      { level: 5, threshold: 50, name: "Leyenda" }
-    ])
-  },
-  {
-    name: "Comunicador Social",
-    description: "Comenta las degustaciones de tus amigos",
-    category: "COMMENTS",
-    levels: JSON.stringify([
-      { level: 1, threshold: 5, name: "Tímido" },
-      { level: 2, threshold: 10, name: "Conversador" },
-      { level: 3, threshold: 25, name: "Sociable" },
-      { level: 4, threshold: 50, name: "Influencer" },
-      { level: 5, threshold: 100, name: "Community Manager" }
-    ])
-  }
+// TODOS LOS LOCALES
+const INITIAL_VENUES = [
+  // --- MADRID ---
+  { name: "La Tape", address: "Calle de San Bernardo, 88", city: "Madrid", country: "ES" },
+  { name: "Fábrica Maravillas", address: "Calle de Valverde, 29", city: "Madrid", country: "ES" },
+  { name: "The Beer Lab", address: "Calle de Manuela Malasaña, 9", city: "Madrid", country: "ES" },
+  { name: "Oldenburg", address: "Calle de Campoamor, 13", city: "Madrid", country: "ES" },
+  { name: "Irreale", address: "Calle de Manuela Malasaña, 20", city: "Madrid", country: "ES" },
+  { name: "Fogg Bar Birras & Cheese", address: "Calle de Moratín, 5", city: "Madrid", country: "ES" },
+  { name: "Chinaski Lavapiés", address: "Calle de la Fe, 19", city: "Madrid", country: "ES" },
+  { name: "Bee Beer", address: "Calle de Augusto Figueroa, 30", city: "Madrid", country: "ES" },
+  { name: "El Pedal", address: "Calle de Argumosa, 33", city: "Madrid", country: "ES" },
+  { name: "Mad Brewing", address: "Calle de Julián Camarillo, 19", city: "Madrid", country: "ES" },
+  { name: "Taproom Madrid", address: "Calle de Andrés Mellado, 43", city: "Madrid", country: "ES" },
+  { name: "Pez Tortilla", address: "Calle del Pez, 36", city: "Madrid", country: "ES" },
+  { name: "Kloster", address: "Calle del Cardenal Cisneros, 25", city: "Madrid", country: "ES" },
+
+  // --- BARCELONA ---
+  { name: "BierCaB", address: "Carrer de la Muntaner, 55", city: "Barcelona", country: "ES" },
+  { name: "Garage Beer Co", address: "Carrer del Consell de Cent, 261", city: "Barcelona", country: "ES" },
+  { name: "Cervecería Catalana", address: "Carrer de Mallorca, 236", city: "Barcelona", country: "ES" },
+  { name: "BlackLab Brewhouse", address: "Carrer de la Diputació, 251", city: "Barcelona", country: "ES" },
+  { name: "La Cervesera Artesana", address: "Carrer de Sant Joaquim, 35", city: "Barcelona", country: "ES" },
+  { name: "Ale&Hop", address: "Carrer de les Basses de Sant Pere, 10", city: "Barcelona", country: "ES" },
+  { name: "Abirradero", address: "Carrer de Vila i Vilà, 77", city: "Barcelona", country: "ES" },
+  { name: "CocoVail Beer Hall", address: "Carrer d'Aragó, 284", city: "Barcelona", country: "ES" },
+  { name: "Mikkeller Bar Barcelona", address: "Carrer de València, 202", city: "Barcelona", country: "ES" },
+  { name: "Kaelderkold", address: "Carrer del Cardenal Casañas, 7", city: "Barcelona", country: "ES" },
+
+  // --- VALENCIA ---
+  { name: "Tyris on Tap", address: "Carrer de la Pau, 27", city: "Valencia", country: "ES" },
+  { name: "Birra & Blues", address: "Carrer de Sant Vicent Màrtir, 23", city: "Valencia", country: "ES" },
+  { name: "Olhöps Craft Beer House", address: "Carrer de Sueca, 21", city: "Valencia", country: "ES" },
+  { name: "Ruzanuvol", address: "Carrer de Lluís de Santàngel, 3", city: "Valencia", country: "ES" },
+  { name: "Las Cervezas del Mercado", address: "Mercado de Colón", city: "Valencia", country: "ES" },
+
+  // --- PAÍS VASCO ---
+  { name: "La Viña del Ensanche", address: "Calle de la Diputación, 10", city: "Bilbao", country: "ES" },
+  { name: "Mojigatos", address: "Calle de Elcano, 21", city: "Bilbao", country: "ES" },
+  { name: "Penguin Bar", address: "Gregorio de la Revilla, 8", city: "Bilbao", country: "ES" },
+  { name: "Bihotz Café", address: "Arechaga Kalea, 6", city: "Bilbao", country: "ES" },
+  { name: "Mala Gissona Beer House", address: "Zabaleta Kalea, 53", city: "San Sebastián", country: "ES" },
+  { name: "Drunkat", address: "Virgen del Carmen, 33", city: "San Sebastián", country: "ES" },
+
+  // --- INTERNACIONAL ---
+  { name: "Hofbräuhaus München", address: "Platzl 9", city: "Munich", country: "DE" },
+  { name: "Augustiner-Keller", address: "Arnulfstraße 52", city: "Munich", country: "DE" },
+  { name: "Delirium Café", address: "Impasse de la Fidélité 4A", city: "Brussels", country: "BE" },
+  { name: "The Temple Bar", address: "47 Temple Bar", city: "Dublin", country: "IE" },
+  { name: "BrewDog Soho", address: "21 Poland St", city: "London", country: "GB" },
+  { name: "Russian River Brewing", address: "725 4th St", city: "Santa Rosa", country: "US" }
 ];
 
-// Función principal para crear datos de ejemplo
-export const seedDatabase = async (currentUserId: string) => {
-  try {
-    console.log('🌱 Iniciando creación de datos de ejemplo...');
-
-    const createdData = {
-      beers: 0,
-      venues: 0,
-      badges: 0,
-      users: 0
-    };
-
-    // 1. Crear usuarios de ejemplo PRIMERO
-    console.log('👥 Creando usuarios de ejemplo...');
-    for (const user of SAMPLE_USERS) {
-      try {
-        // Verificar si el usuario ya existe
-        const existing = await client.models.UserProfile.list({
-          filter: { userId: { eq: user.userId } },
-          limit: 1
-        });
-
-        if (!existing.data || existing.data.length === 0) {
-          const response = await client.models.UserProfile.create(user);
-          if (response.data) {
-            createdData.users++;
-            console.log(`✅ Usuario creado: ${user.username}`);
-          }
-        } else {
-          console.log(`ℹ️ Usuario ya existe: ${user.username}`);
-        }
-      } catch (error: any) {
-        console.log(`⚠️ Usuario ${user.username}:`, error.message);
-      }
-    }
-
-    // 2. Crear cervezas de ejemplo
-    console.log('🍺 Creando cervezas...');
-    const createdBeers = [];
-    for (const beer of SAMPLE_BEERS) {
-      try {
+// Función para crear TODAS las cervezas
+export const createAllBeers = async (currentUserId?: string) => {
+  console.log('🍺 Creando TODAS las cervezas del catálogo...');
+  const createdBeers = [];
+  let skipped = 0;
+  
+  for (const beer of INITIAL_BEERS) {
+    try {
+      // Verificar si ya existe
+      const existing = await client.models.Beer.list({
+        filter: { name: { eq: beer.name } },
+        limit: 1
+      });
+      
+      if (!existing.data || existing.data.length === 0) {
         const response = await client.models.Beer.create({
           ...beer,
-          addedById: currentUserId,
-          averageRating: Math.random() * 2 + 3,
-          ratingsCount: Math.floor(Math.random() * 50) + 5
-        });
+          averageRating: Math.random() * 2 + 3, // 3.0 - 5.0
+          ratingsCount: Math.floor(Math.random() * 100) + 10, // 10-110
+          addedById: currentUserId
+        } as any);
+        
         if (response.data) {
           createdBeers.push(response.data);
-          createdData.beers++;
+          console.log(`✓ Creada: ${beer.name}`);
         }
-      } catch (error: any) {
-        console.log(`⚠️ Cerveza ${beer.name}:`, error.message);
+      } else {
+        skipped++;
       }
+    } catch (error) {
+      console.error(`✗ Error creando ${beer.name}:`, error);
     }
+  }
+  
+  console.log(`✅ ${createdBeers.length} cervezas creadas, ${skipped} ya existían`);
+  return { created: createdBeers, skipped };
+};
 
-    // 3. Crear locales de ejemplo
-    console.log('🏪 Creando locales...');
-    const createdVenues = [];
-    for (const venue of SAMPLE_VENUES) {
-      try {
+// Función para crear TODOS los locales
+export const createAllVenues = async (currentUserId?: string) => {
+  console.log('🏪 Creando TODOS los locales del catálogo...');
+  const createdVenues = [];
+  let skipped = 0;
+  
+  for (const venue of INITIAL_VENUES) {
+    try {
+      const existing = await client.models.Venue.list({
+        filter: { name: { eq: venue.name } },
+        limit: 1
+      });
+      
+      if (!existing.data || existing.data.length === 0) {
         const response = await client.models.Venue.create({
           ...venue,
-          addedById: currentUserId,
-          likes: Math.floor(Math.random() * 30) + 5
+          likes: Math.floor(Math.random() * 50) + 5, // 5-55
+          addedById: currentUserId
         });
+        
         if (response.data) {
           createdVenues.push(response.data);
-          createdData.venues++;
+          console.log(`✓ Creado: ${venue.name}`);
         }
-      } catch (error: any) {
-        console.log(`⚠️ Local ${venue.name}:`, error.message);
+      } else {
+        skipped++;
       }
+    } catch (error) {
+      console.error(`✗ Error creando ${venue.name}:`, error);
     }
-
-    // 4. Crear galardones de ejemplo
-    console.log('🏆 Creando galardones...');
-    for (const badge of SAMPLE_BADGES) {
-      try {
-        const response = await client.models.Badge.create({
-          ...badge,
-          createdBy: 'system'
-        });
-        if (response.data) {
-          createdData.badges++;
-        }
-      } catch (error: any) {
-        console.log(`⚠️ Galardón ${badge.name}:`, error.message);
-      }
-    }
-
-    console.log('✨ Datos de ejemplo creados exitosamente!');
-    return {
-      success: true,
-      data: createdData
-    };
-  } catch (error) {
-    console.error('❌ Error creando datos de ejemplo:', error);
-    return { success: false, error };
   }
+  
+  console.log(`✅ ${createdVenues.length} locales creados, ${skipped} ya existían`);
+  return { created: createdVenues, skipped };
 };
 
-// Función para verificar si ya existen datos
-export const checkIfDataExists = async () => {
-  try {
-    const beersResponse = await client.models.Beer.list({ limit: 1 });
-    const badgesResponse = await client.models.Badge.list({ limit: 1 });
-    const usersResponse = await client.models.UserProfile.list({ limit: 3 });
-    
-    return {
-      hasBeers: (beersResponse.data?.length || 0) > 0,
-      hasBadges: (badgesResponse.data?.length || 0) > 0,
-      hasUsers: (usersResponse.data?.length || 0) > 2 // Al menos 2 usuarios además del actual
-    };
-  } catch (error) {
-    console.error('Error verificando datos:', error);
-    return { hasBeers: false, hasBadges: false, hasUsers: false };
-  }
-};
-
-// Función para crear solo usuarios (útil si ya tienes cervezas)
+// Función para crear usuarios de ejemplo
 export const createSampleUsersOnly = async () => {
-  console.log('👥 Creando solo usuarios de ejemplo...');
+  console.log('👥 Creando usuarios de ejemplo...');
   let created = 0;
   
   for (const user of SAMPLE_USERS) {
@@ -523,4 +405,60 @@ export const createSampleUsersOnly = async () => {
   }
   
   return { success: true, created };
+};
+
+// FUNCIÓN PRINCIPAL - Inicializar TODO
+export const initializeAllData = async (currentUserId: string) => {
+  console.log('🚀 ===============================================');
+  console.log('🚀 INICIALIZANDO TODOS LOS DATOS DE BEERSP');
+  console.log('🚀 ===============================================');
+  
+  try {
+    // 1. Crear usuarios de ejemplo
+    console.log('\n📍 Paso 1: Usuarios de ejemplo');
+    const usersResult = await createSampleUsersOnly();
+    
+    // 2. Crear TODAS las cervezas
+    console.log('\n📍 Paso 2: Catálogo de cervezas');
+    const beersResult = await createAllBeers(currentUserId);
+    
+    // 3. Crear TODOS los locales
+    console.log('\n📍 Paso 3: Catálogo de locales');
+    const venuesResult = await createAllVenues(currentUserId);
+    
+    console.log('\n🎉 ===============================================');
+    console.log('🎉 INICIALIZACIÓN COMPLETADA');
+    console.log(`✅ Usuarios: ${usersResult.created}`);
+    console.log(`✅ Cervezas: ${beersResult.created.length} nuevas (${beersResult.skipped} ya existían)`);
+    console.log(`✅ Locales: ${venuesResult.created.length} nuevos (${venuesResult.skipped} ya existían)`);
+    console.log('🎉 ===============================================\n');
+    
+    return {
+      success: true,
+      users: usersResult.created,
+      beers: beersResult.created.length,
+      venues: venuesResult.created.length
+    };
+  } catch (error) {
+    console.error('❌ Error en la inicialización:', error);
+    return { success: false, error };
+  }
+};
+
+// Verificar si ya existen datos
+export const checkIfDataExists = async () => {
+  try {
+    const beersResponse = await client.models.Beer.list({ limit: 1 });
+    const badgesResponse = await client.models.Badge.list({ limit: 1 });
+    const usersResponse = await client.models.UserProfile.list({ limit: 3 });
+    
+    return {
+      hasBeers: (beersResponse.data?.length || 0) > 0,
+      hasBadges: (badgesResponse.data?.length || 0) > 0,
+      hasUsers: (usersResponse.data?.length || 0) > 2
+    };
+  } catch (error) {
+    console.error('Error verificando datos:', error);
+    return { hasBeers: false, hasBadges: false, hasUsers: false };
+  }
 };

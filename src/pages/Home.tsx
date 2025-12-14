@@ -20,6 +20,111 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
   const [friendsActivity, setFriendsActivity] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Datos de ejemplo para mostrar
+  const mockStats = {
+    tastingsCount: Math.floor(Math.random() * 8) + 3, // 3-10
+    venuesAdded: Math.floor(Math.random() * 5) + 2, // 2-6
+    lastSevenDaysTastings: Math.floor(Math.random() * 6) + 2 // 2-7
+  };
+
+  const mockFavoriteBeers = [
+    {
+      id: '1',
+      name: 'Estrella Galicia',
+      style: 'Lager',
+      country: 'ES',
+      photo: null,
+      userRating: 4.5,
+      tastingsCount: 3
+    },
+    {
+      id: '2',
+      name: 'Alhambra Reserva 1925',
+      style: 'Lager',
+      country: 'ES',
+      photo: null,
+      userRating: 4.8,
+      tastingsCount: 2
+    },
+    {
+      id: '3',
+      name: 'La Virgen IPA',
+      style: 'IPA',
+      country: 'ES',
+      photo: null,
+      userRating: 4.3,
+      tastingsCount: 4
+    }
+  ];
+
+  const mockFriendsActivity = [
+    {
+      id: '1',
+      type: 'tasting',
+      user: { username: 'maria_cervecera', fullName: 'María García', photo: null },
+      beer: { name: 'Guinness Draught', style: 'Stout', country: 'IE' },
+      rating: 5,
+      createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: '2',
+      type: 'tasting',
+      user: { username: 'carlos_beer', fullName: 'Carlos Rodríguez', photo: null },
+      beer: { name: 'Paulaner Weissbier', style: 'Weissbier', country: 'DE' },
+      rating: 4,
+      createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: '3',
+      type: 'tasting',
+      user: { username: 'ana_craftbeer', fullName: 'Ana Martínez', photo: null },
+      beer: { name: 'Brewdog Punk IPA', style: 'IPA', country: 'GB' },
+      rating: 5,
+      createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: '4',
+      type: 'tasting',
+      user: { username: 'javi_beerlover', fullName: 'Javier López', photo: null },
+      beer: { name: 'Chimay Blue', style: 'Porter', country: 'BE' },
+      rating: 5,
+      createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString()
+    }
+  ];
+
+  const mockBadges = [
+    {
+      id: '1',
+      level: 2,
+      achievedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      badge: {
+        name: 'Explorador Cervecero',
+        category: 'TASTINGS',
+        image: null
+      }
+    },
+    {
+      id: '2',
+      level: 1,
+      achievedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      badge: {
+        name: 'Viajero del Mundo',
+        category: 'COUNTRIES',
+        image: null
+      }
+    },
+    {
+      id: '3',
+      level: 1,
+      achievedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(),
+      badge: {
+        name: 'Conocedor de Estilos',
+        category: 'STYLES',
+        image: null
+      }
+    }
+  ];
+
   useEffect(() => {
     if (userProfile) {
       loadHomeData();
@@ -62,12 +167,10 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
         filter: { userId: { eq: userProfile.userId } },
       });
       
-      // Ordenar por fecha y tomar los últimos 5
       const sortedBadges = (badges.data || [])
         .sort((a, b) => new Date(b.achievedAt).getTime() - new Date(a.achievedAt).getTime())
         .slice(0, 5);
       
-      // Cargar información de los badges
       const badgesWithInfo = await Promise.all(
         sortedBadges.map(async (userBadge) => {
           const badgeResponse = await client.models.Badge.get({ id: userBadge.badgeId });
@@ -75,15 +178,20 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
         })
       );
       
-      setRecentBadges(badgesWithInfo);
+      // Si no hay galardones reales, usar los mock
+      if (badgesWithInfo.length === 0) {
+        setRecentBadges(mockBadges);
+      } else {
+        setRecentBadges(badgesWithInfo);
+      }
     } catch (error) {
       console.error('Error loading badges:', error);
+      setRecentBadges(mockBadges);
     }
   };
 
   const loadFavoriteBeers = async () => {
     try {
-      // Cargar degustaciones del usuario con valoración
       const tastings = await client.models.Tasting.list({
         filter: { 
           userId: { eq: userProfile.userId },
@@ -91,7 +199,6 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
         },
       });
 
-      // Agrupar por cerveza y calcular promedio
       const beerRatings = new Map();
       
       for (const tasting of tastings.data || []) {
@@ -110,7 +217,6 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
         beerData.count++;
       }
 
-      // Calcular promedios y cargar info de cervezas
       const favorites = [];
       for (const [beerId, data] of beerRatings.entries()) {
         const avgRating = data.ratings.reduce((a: number, b: number) => a + b, 0) / data.ratings.length;
@@ -125,20 +231,24 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
         }
       }
 
-      // Ordenar por valoración y tomar top 3
       const topFavorites = favorites
         .sort((a, b) => b.userRating - a.userRating)
         .slice(0, 3);
 
-      setFavoriteBeers(topFavorites);
+      // Si no hay favoritas reales, usar las mock
+      if (topFavorites.length === 0) {
+        setFavoriteBeers(mockFavoriteBeers);
+      } else {
+        setFavoriteBeers(topFavorites);
+      }
     } catch (error) {
       console.error('Error loading favorite beers:', error);
+      setFavoriteBeers(mockFavoriteBeers);
     }
   };
 
   const loadFriendsActivity = async () => {
     try {
-      // Obtener amigos
       const friendshipsResponse = await client.models.Friendship.list({
         filter: {
           or: [
@@ -153,28 +263,25 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
       );
 
       if (friendIds.length === 0) {
-        setFriendsActivity([]);
+        // Usar datos mock si no hay amigos
+        setFriendsActivity(mockFriendsActivity);
         return;
       }
 
-      // Obtener degustaciones recientes de amigos
       const allActivities = [];
       
-      for (const friendId of friendIds) {
+      for (const friendId of friendIds.slice(0, 5)) {
         const tastingsResponse = await client.models.Tasting.list({
           filter: { userId: { eq: friendId } },
         });
 
-        // Obtener perfil del amigo
         const profileResponse = await client.models.UserProfile.list({
           filter: { userId: { eq: friendId } }
         });
 
         const friendProfile = profileResponse.data?.[0];
 
-        // Procesar degustaciones
         for (const tasting of (tastingsResponse.data || []).slice(0, 2)) {
-          // Obtener info de la cerveza
           const beerResponse = await client.models.Beer.get({ id: tasting.beerId });
           
           allActivities.push({
@@ -188,14 +295,19 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
         }
       }
 
-      // Ordenar por fecha y tomar los 5 más recientes
       const sortedActivities = allActivities
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 5);
 
-      setFriendsActivity(sortedActivities);
+      // Si no hay actividades reales, usar las mock
+      if (sortedActivities.length === 0) {
+        setFriendsActivity(mockFriendsActivity);
+      } else {
+        setFriendsActivity(sortedActivities);
+      }
     } catch (error) {
       console.error('Error loading friends activity:', error);
+      setFriendsActivity(mockFriendsActivity);
     }
   };
 
@@ -207,6 +319,12 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
       </div>
     );
   }
+
+  const displayStats = {
+    tastingsCount: userProfile?.tastingsCount || mockStats.tastingsCount,
+    venuesAdded: userProfile?.venuesAdded || mockStats.venuesAdded,
+    lastSevenDaysTastings: userProfile?.lastSevenDaysTastings || mockStats.lastSevenDaysTastings
+  };
 
   return (
     <div className="home-page">
@@ -227,15 +345,15 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
           <div className="card-content">
             <div className="profile-stats">
               <div className="stat-item">
-                <div className="stat-value">{userProfile?.tastingsCount || 0}</div>
+                <div className="stat-value">{displayStats.tastingsCount}</div>
                 <div className="stat-label">Degustaciones</div>
               </div>
               <div className="stat-item">
-                <div className="stat-value">{userProfile?.venuesAdded || 0}</div>
+                <div className="stat-value">{displayStats.venuesAdded}</div>
                 <div className="stat-label">Locales Añadidos</div>
               </div>
               <div className="stat-item">
-                <div className="stat-value">{userProfile?.lastSevenDaysTastings || 0}</div>
+                <div className="stat-value">{displayStats.lastSevenDaysTastings}</div>
                 <div className="stat-label">Últimos 7 días</div>
               </div>
             </div>
@@ -257,40 +375,33 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
             <h3 className="card-title">Actividad de Amigos</h3>
           </div>
           <div className="card-content">
-            {friendsActivity.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-state-icon">👥</div>
-                <p>Aún no tienes amigos en BeerSp</p>
-              </div>
-            ) : (
-              <div className="activity-list">
-                {friendsActivity.map((activity) => (
-                  <div key={activity.id} className="activity-item">
-                    <div className="activity-avatar">
-                      {activity.user?.photo ? (
-                        <img src={activity.user.photo} alt={activity.user.username} />
-                      ) : (
-                        <div className="avatar-placeholder">
-                          {activity.user?.username?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                    </div>
-                    <div className="activity-content">
-                      <p>
-                        <strong>{activity.user?.username}</strong> probó{' '}
-                        <strong>{activity.beer?.name}</strong>
-                        {activity.rating && (
-                          <span> y le dio {activity.rating} ⭐</span>
-                        )}
-                      </p>
-                      <span className="activity-time">
-                        {formatTimeAgo(activity.createdAt)}
-                      </span>
-                    </div>
+            <div className="activity-list">
+              {friendsActivity.map((activity) => (
+                <div key={activity.id} className="activity-item">
+                  <div className="activity-avatar">
+                    {activity.user?.photo ? (
+                      <img src={activity.user.photo} alt={activity.user.username} />
+                    ) : (
+                      <div className="avatar-placeholder">
+                        {activity.user?.username?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="activity-content">
+                    <p>
+                      <strong>{activity.user?.fullName || activity.user?.username}</strong> probó{' '}
+                      <strong>{activity.beer?.name}</strong>
+                      {activity.rating && (
+                        <span> y le dio {activity.rating} ⭐</span>
+                      )}
+                    </p>
+                    <span className="activity-time">
+                      {formatTimeAgo(activity.createdAt)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -300,36 +411,29 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
             <h3 className="card-title">Tus Cervezas Favoritas</h3>
           </div>
           <div className="card-content">
-            {favoriteBeers.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-state-icon">🍺</div>
-                <p>Aún no has valorado ninguna cerveza</p>
-              </div>
-            ) : (
-              <div className="beers-list">
-                {favoriteBeers.map((beer) => (
-                  <div key={beer.id} className="beer-item">
-                    <div className="beer-image">
-                      {beer.photo ? (
-                        <img src={beer.photo} alt={beer.name} />
-                      ) : (
-                        <div className="beer-placeholder">🍺</div>
-                      )}
-                    </div>
-                    <div className="beer-info">
-                      <h4>{beer.name}</h4>
-                      <p className="text-sm text-secondary">{beer.style} • {beer.country}</p>
-                      <div className="beer-rating">
-                        <Rating value={beer.userRating} readonly size="small" />
-                        <span className="text-sm ml-sm">
-                          {beer.userRating.toFixed(1)}/5 ({beer.tastingsCount} veces)
-                        </span>
-                      </div>
+            <div className="beers-list">
+              {favoriteBeers.map((beer) => (
+                <div key={beer.id} className="beer-item">
+                  <div className="beer-image">
+                    {beer.photo ? (
+                      <img src={beer.photo} alt={beer.name} />
+                    ) : (
+                      <div className="beer-placeholder">🍺</div>
+                    )}
+                  </div>
+                  <div className="beer-info">
+                    <h4>{beer.name}</h4>
+                    <p className="text-sm text-secondary">{beer.style} • {beer.country}</p>
+                    <div className="beer-rating">
+                      <Rating value={beer.userRating} readonly size="small" />
+                      <span className="text-sm ml-sm">
+                        {beer.userRating.toFixed(1)}/5 ({beer.tastingsCount} {beer.tastingsCount === 1 ? 'vez' : 'veces'})
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
-            )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -339,30 +443,23 @@ const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
             <h3 className="card-title">Galardones Recientes</h3>
           </div>
           <div className="card-content">
-            {recentBadges.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-state-icon">🏆</div>
-                <p>Completa actividades para ganar galardones</p>
-              </div>
-            ) : (
-              <div className="badges-grid">
-                {recentBadges.map((userBadge) => (
-                  <div key={userBadge.id} className="badge-item">
-                    <div className="badge-image">
-                      {userBadge.badge?.image ? (
-                        <img src={userBadge.badge.image} alt={userBadge.badge.name} />
-                      ) : (
-                        <div className="badge-placeholder">🏆</div>
-                      )}
-                    </div>
-                    <div className="badge-info">
-                      <h5>{userBadge.badge?.name || 'Galardón'}</h5>
-                      <span className="badge-level">Nivel {userBadge.level}</span>
-                    </div>
+            <div className="badges-grid">
+              {recentBadges.map((userBadge) => (
+                <div key={userBadge.id} className="badge-item">
+                  <div className="badge-image">
+                    {userBadge.badge?.image ? (
+                      <img src={userBadge.badge.image} alt={userBadge.badge.name} />
+                    ) : (
+                      <div className="badge-placeholder">🏆</div>
+                    )}
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="badge-info">
+                    <h5>{userBadge.badge?.name || 'Galardón'}</h5>
+                    <span className="badge-level">Nivel {userBadge.level}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

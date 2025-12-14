@@ -6,7 +6,7 @@
   box-shadow: var(--shadow-md);
   height: fit-content;
   position: sticky;
-  top: calc(80px + var(--spacing-md));
+  top: var(--spacing-md);
 }
 
 .nav-list {

@@ -4,7 +4,7 @@
   justify-content: center;
   gap: var(--spacing-xs);
   font-family: var(--font-primary);
-  font-weight: 500;
+  font-weight: 700;
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
@@ -19,54 +19,65 @@
   transform: none !important;
 }
 
-/* Variants */
+/* Variants - MEJORADO CONTRASTE */
 .btn-primary {
   background: var(--color-primary);
   color: white;
   box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-primary);
+  font-weight: 700;
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--color-primary-dark);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
+  border-color: var(--color-primary-dark);
 }
 
 .btn-secondary {
-  background: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid var(--color-primary);
+  background: white;
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
   box-shadow: var(--shadow-sm);
+  font-weight: 700;
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--color-surface-dark);
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary-dark);
 }
 
 .btn-text {
   background: transparent;
   color: var(--color-primary);
+  font-weight: 700;
 }
 
 .btn-text:hover:not(:disabled) {
   background: var(--color-surface-dark);
+  color: var(--color-primary-dark);
 }
 
 .btn-danger {
   background: var(--color-error);
   color: white;
   box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-error);
+  font-weight: 700;
 }
 
 .btn-danger:hover:not(:disabled) {
   background: #B71C1C;
   box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 
 /* Sizes */
 .btn-small {
   padding: var(--spacing-xs) var(--spacing-sm);
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
 }
 
 .btn-medium {
@@ -107,4 +118,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Asegurar buen contraste con el texto */
+.btn span.btn-text {
+  color: inherit;
+  font-weight: inherit;
 }

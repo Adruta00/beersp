@@ -27,7 +27,7 @@ const InitializeData: React.FC = () => {
       // 2. Crear locales
       addLog('📦 Creando locales...');
       const venues = await seedInitialData.createVenues();
-      addLog(`✅ ${venues.length} locales creados/verificados`);
+      addLog(`✅ ${venues.length} locales disponibles`);
 
       // 3. Inicializar galardones
       addLog('🏆 Inicializando sistema de galardones...');

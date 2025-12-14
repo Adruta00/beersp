@@ -2,9 +2,9 @@
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   box-shadow: var(--shadow-lg);
-  /* CORREGIDO: Quitado position sticky para que no oculte contenido */
   position: relative;
   z-index: 100;
+  margin-bottom: var(--spacing-lg);
 }
 
 .header-container {
@@ -96,16 +96,16 @@
   background: white;
   border: 2px solid white;
   color: var(--color-primary);
-  font-weight: 600;
+  font-weight: 700;
   padding: var(--spacing-sm) var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .header-actions .btn-secondary:hover {
   background: var(--color-surface-dark);
   color: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 @media (max-width: 768px) {

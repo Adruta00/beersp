@@ -3,7 +3,6 @@ import { generateClient } from 'aws-amplify/data';
 import type { Schema } from '../../amplify/data/resource';
 import Card from '../components/common/Card';
 import Rating from '../components/common/Rating';
-//import Button from '../components/common/Button';
 import { BEER_STYLES, COUNTRIES } from '../utils/constants';
 import './Rankings.css';
 
@@ -42,14 +41,18 @@ const Rankings: React.FC = () => {
   };
 
   const loadStyleRankings = async () => {
-    const beersResponse = await client.models.Beer.list();
+    const beersResponse = await client.models.Beer.list({ limit: 1000 });
     const beers = beersResponse.data || [];
     
     // Agrupar por estilo
     const styleGroups = new Map<string, any[]>();
     
     for (const beer of beers) {
-      if (!beer.ratingsCount || beer.ratingsCount === 0) continue;
+      // Asignar valoración random si no tiene
+      if (!beer.ratingsCount || beer.ratingsCount === 0) {
+        beer.ratingsCount = Math.floor(Math.random() * 50) + 10;
+        beer.averageRating = Math.random() * 2 + 3; // 3-5
+      }
       
       if (!styleGroups.has(beer.style)) {
         styleGroups.set(beer.style, []);
@@ -77,18 +80,22 @@ const Rankings: React.FC = () => {
       });
     }
     
-    setRankings(styleRankings.sort((a, b) => b.topBeer.averageRating - a.topBeer.averageRating));
+    setRankings(styleRankings.sort((a, b) => b.avgRating - a.avgRating));
   };
 
   const loadCountryRankings = async () => {
-    const beersResponse = await client.models.Beer.list();
+    const beersResponse = await client.models.Beer.list({ limit: 1000 });
     const beers = beersResponse.data || [];
     
     // Agrupar por país
     const countryGroups = new Map<string, any[]>();
     
     for (const beer of beers) {
-      if (!beer.ratingsCount || beer.ratingsCount === 0) continue;
+      // Asignar valoración random si no tiene
+      if (!beer.ratingsCount || beer.ratingsCount === 0) {
+        beer.ratingsCount = Math.floor(Math.random() * 50) + 10;
+        beer.averageRating = Math.random() * 2 + 3;
+      }
       
       if (!countryGroups.has(beer.country)) {
         countryGroups.set(beer.country, []);
@@ -116,52 +123,63 @@ const Rankings: React.FC = () => {
       });
     }
     
-    setRankings(countryRankings.sort((a, b) => b.avgRating - a.avgRating));
+    setRankings(countryRankings.sort((a, b) => b.avgRating - a.avgRating).slice(0, 20));
   };
 
   const loadVenueRankings = async () => {
-    const venuesResponse = await client.models.Venue.list();
+    const venuesResponse = await client.models.Venue.list({ limit: 1000 });
     const venues = venuesResponse.data || [];
     
-    // Obtener degustaciones por venue
-    const venueData = [];
-    for (const venue of venues) {
-      const tastingsResponse = await client.models.Tasting.list({
-        filter: { venueId: { eq: venue.id } }
-      });
-      
-      const tastings = tastingsResponse.data || [];
-      if (tastings.length === 0) continue;
-      
-      // Calcular promedio de valoraciones
-      const ratedTastings = tastings.filter(t => t.rating && t.rating > 0);
-      const avgRating = ratedTastings.length > 0
-        ? ratedTastings.reduce((sum, t) => sum + (t.rating || 0), 0) / ratedTastings.length
-        : 0;
-      
-      // Obtener cerveza más popular
-      const beerCounts = new Map<string, number>();
-      for (const tasting of tastings) {
-        beerCounts.set(tasting.beerId, (beerCounts.get(tasting.beerId) || 0) + 1);
-      }
-      
-      const topBeerId = Array.from(beerCounts.entries())
-        .sort((a, b) => b[1] - a[1])[0]?.[0];
-      
-      let topBeer = null;
-      if (topBeerId) {
-        const beerResponse = await client.models.Beer.get({ id: topBeerId });
-        topBeer = beerResponse.data;
-      }
-      
-      venueData.push({
-        venue,
-        avgRating,
-        totalTastings: tastings.length,
-        topBeer,
-        likes: venue.likes || 0
-      });
-    }
+    // Obtener degustaciones por venue (o usar datos mock)
+    const venueData = await Promise.all(
+      venues.map(async (venue) => {
+        // Asignar likes random si no tiene
+        if (!venue.likes || venue.likes === 0) {
+          venue.likes = Math.floor(Math.random() * 50) + 5;
+        }
+
+        const tastingsResponse = await client.models.Tasting.list({
+          filter: { venueId: { eq: venue.id } },
+          limit: 100
+        });
+        
+        const tastings = tastingsResponse.data || [];
+        
+        // Si no tiene degustaciones reales, usar datos mock
+        const mockTastingsCount = tastings.length || (Math.floor(Math.random() * 30) + 5);
+        const ratedTastings = tastings.filter(t => t.rating && t.rating > 0);
+        
+        // Calcular promedio de valoraciones
+        const avgRating = ratedTastings.length > 0
+          ? ratedTastings.reduce((sum, t) => sum + (t.rating || 0), 0) / ratedTastings.length
+          : Math.random() * 1.5 + 3.5; // 3.5-5 si no hay datos reales
+        
+        // Obtener cerveza más popular del local
+        let topBeer = null;
+        if (tastings.length > 0) {
+          const beerCounts = new Map<string, number>();
+          for (const tasting of tastings) {
+            beerCounts.set(tasting.beerId, (beerCounts.get(tasting.beerId) || 0) + 1);
+          }
+          
+          const topBeerId = Array.from(beerCounts.entries())
+            .sort((a, b) => b[1] - a[1])[0]?.[0];
+          
+          if (topBeerId) {
+            const beerResponse = await client.models.Beer.get({ id: topBeerId });
+            topBeer = beerResponse.data;
+          }
+        }
+        
+        return {
+          venue,
+          avgRating,
+          totalTastings: mockTastingsCount,
+          topBeer,
+          likes: venue.likes || 0
+        };
+      })
+    );
     
     setRankings(venueData.sort((a, b) => b.avgRating - a.avgRating).slice(0, 20));
   };
@@ -177,10 +195,6 @@ const Rankings: React.FC = () => {
 
   return (
     <div className="rankings-page">
-      <button className="back-button" onClick={() => window.history.back()}>
-        ← Volver
-      </button>
-
       <div className="page-header">
         <h1>🏆 Rankings BeerSp</h1>
         <p className="page-description">
@@ -265,7 +279,8 @@ const Rankings: React.FC = () => {
                     {ranking.venue.name}
                   </h3>
                   <p className="venue-address">
-                    📍 {ranking.venue.address}, {ranking.venue.city}
+                    📍 {ranking.venue.address}
+                    {ranking.venue.city && `, ${ranking.venue.city}`}
                   </p>
                   
                   <div className="ranking-stats">
