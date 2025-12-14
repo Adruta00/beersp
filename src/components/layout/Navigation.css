@@ -1,32 +1,43 @@
 .navigation {
-  width: 250px;
+  width: 200px;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-md);
+  padding: var(--spacing-sm);
   box-shadow: var(--shadow-md);
   height: fit-content;
   position: sticky;
-  top: var(--spacing-md);
+  top: calc(var(--header-height) + var(--spacing-sm));
+  max-height: calc(100vh - var(--header-height) - var(--spacing-md) * 2);
+  overflow-y: auto;
+}
+
+.navigation::-webkit-scrollbar {
+  width: 4px;
+}
+
+.navigation::-webkit-scrollbar-thumb {
+  background: var(--color-text-light);
+  border-radius: var(--radius-full);
 }
 
 .nav-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 0.25rem;
 }
 
 .nav-item {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-sm) var(--spacing-md);
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--radius-md);
   border: none;
   background: transparent;
   color: var(--color-text);
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -35,13 +46,12 @@
 
 .nav-item:hover {
   background: var(--color-surface-dark);
-  transform: translateX(4px);
+  transform: translateX(2px);
 }
 
 .nav-item.active {
   background: var(--color-primary);
   color: white;
-  box-shadow: var(--shadow-sm);
 }
 
 .nav-item.active:hover {
@@ -49,11 +59,11 @@
 }
 
 .nav-icon {
-  font-size: 1.25rem;
+  font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
+  width: 20px;
 }
 
 .nav-label {
@@ -63,15 +73,17 @@
 @media (max-width: 1024px) {
   .navigation {
     width: 100%;
-    position: static;
-    margin-bottom: var(--spacing-md);
+    position: relative;
+    top: 0;
+    max-height: none;
+    margin-bottom: var(--spacing-sm);
   }
 
   .nav-list {
     flex-direction: row;
     overflow-x: auto;
-    gap: var(--spacing-xs);
-    padding-bottom: var(--spacing-xs);
+    gap: 0.25rem;
+    padding-bottom: 0.25rem;
   }
 
   .nav-item {
@@ -80,14 +92,13 @@
   }
 
   .nav-item:hover {
-    transform: translateX(0);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 }
 
 @media (max-width: 768px) {
   .navigation {
-    padding: var(--spacing-sm);
+    padding: 0.5rem;
   }
 
   .nav-label {
@@ -95,9 +106,9 @@
   }
 
   .nav-item {
-    padding: var(--spacing-sm);
+    padding: 0.5rem;
     justify-content: center;
-    min-width: 48px;
+    min-width: 40px;
   }
 
   .nav-icon {
