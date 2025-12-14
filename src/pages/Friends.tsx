@@ -1,66 +1,62 @@
 import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/data';
-import { useAuthenticator } from '@aws-amplify/ui-react';
 import type { Schema } from '../../amplify/data/resource';
 import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
+import { createSampleUsersOnly } from '../utils/seedData';
 import './Friends.css';
 
 const client = generateClient<Schema>();
 
 interface FriendsProps {
   userId?: string;
-  onUpdate?: () => void;
 }
 
-const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
-  const { user } = useAuthenticator();
+const Friends: React.FC<FriendsProps> = ({ userId }) => {
   const [friends, setFriends] = useState<any[]>([]);
   const [friendRequests, setFriendRequests] = useState<any[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [creatingUsers, setCreatingUsers] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    if (user) {
-      loadData();
+    if (userId) {
+      loadFriends();
+      loadFriendRequests();
+      loadSuggestedUsers();
     }
-  }, [user]);
-
-  const loadData = async () => {
-    await Promise.all([
-      loadFriends(),
-      loadFriendRequests()
-    ]);
-  };
+  }, [userId]);
 
   const loadFriends = async () => {
-    if (!user) return;
-
+    if (!userId) return;
+    
     setLoading(true);
     try {
+      // Cargar amistades aceptadas
       const friendshipsResponse = await client.models.Friendship.list({
         filter: {
           or: [
-            { requesterId: { eq: user.userId }, status: { eq: 'ACCEPTED' } },
-            { receiverId: { eq: user.userId }, status: { eq: 'ACCEPTED' } }
+            { requesterId: { eq: userId }, status: { eq: 'ACCEPTED' } },
+            { receiverId: { eq: userId }, status: { eq: 'ACCEPTED' } }
           ]
         }
       });
 
+      // Obtener perfiles de amigos
       const friendProfiles: any[] = [];
       for (const friendship of friendshipsResponse.data || []) {
-        const friendId = friendship.requesterId === user.userId
-          ? friendship.receiverId
+        const friendId = friendship.requesterId === userId 
+          ? friendship.receiverId 
           : friendship.requesterId;
 
         const profileResponse = await client.models.UserProfile.list({
-          filter: { userId: { eq: friendId } }
+          filter: { userId: { eq: friendId } },
+          limit: 1
         });
 
         if (profileResponse.data && profileResponse.data.length > 0) {
@@ -71,36 +67,36 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
       setFriends(friendProfiles);
     } catch (error) {
       console.error('Error loading friends:', error);
-      setErrorMessage('Error al cargar amigos');
     } finally {
       setLoading(false);
     }
   };
 
   const loadFriendRequests = async () => {
-    if (!user) return;
-
+    if (!userId) return;
+    
     try {
-      const requestsResponse = await client.models.Friendship.list({
+      const response = await client.models.Friendship.list({
         filter: {
-          receiverId: { eq: user.userId },
+          receiverId: { eq: userId },
           status: { eq: 'PENDING' }
         }
       });
 
-      const requestsWithProfiles = [];
-      for (const request of requestsResponse.data || []) {
-        const profileResponse = await client.models.UserProfile.list({
-          filter: { userId: { eq: request.requesterId } }
-        });
-
-        if (profileResponse.data && profileResponse.data.length > 0) {
-          requestsWithProfiles.push({
-            ...request,
-            requester: profileResponse.data[0]
+      // Cargar información de los solicitantes
+      const requestsWithProfiles = await Promise.all(
+        (response.data || []).map(async (request) => {
+          const profileResponse = await client.models.UserProfile.list({
+            filter: { userId: { eq: request.requesterId } },
+            limit: 1
           });
-        }
-      }
+
+          return {
+            ...request,
+            requester: profileResponse.data?.[0]
+          };
+        })
+      );
 
       setFriendRequests(requestsWithProfiles);
     } catch (error) {
@@ -108,11 +104,49 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
     }
   };
 
+  const loadSuggestedUsers = async () => {
+    if (!userId) return;
+    
+    try {
+      // Cargar todos los usuarios menos el actual
+      const allUsersResponse = await client.models.UserProfile.list({
+        limit: 100
+      });
+
+      // Obtener IDs de amigos actuales y solicitudes pendientes
+      const friendshipsResponse = await client.models.Friendship.list({
+        filter: {
+          or: [
+            { requesterId: { eq: userId } },
+            { receiverId: { eq: userId } }
+          ]
+        }
+      });
+
+      const connectedUserIds = new Set(
+        (friendshipsResponse.data || []).map(f => 
+          f.requesterId === userId ? f.receiverId : f.requesterId
+        )
+      );
+
+      // Filtrar usuarios que no son amigos ni tienen solicitud pendiente
+      const suggested = (allUsersResponse.data || [])
+        .filter(user => 
+          user.userId !== userId && 
+          !connectedUserIds.has(user.userId)
+        )
+        .slice(0, 20); // Mostrar máximo 20 sugerencias
+
+      setSuggestedUsers(suggested);
+    } catch (error) {
+      console.error('Error loading suggested users:', error);
+    }
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
     setLoading(true);
-    setErrorMessage('');
     try {
       const response = await client.models.UserProfile.list({
         filter: {
@@ -124,142 +158,135 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
         },
       });
 
-      const filteredResults = (response.data || []).filter(
-        profile => profile.userId !== user?.userId
-      );
-
-      setSearchResults(filteredResults);
-      
-      if (filteredResults.length === 0) {
-        setErrorMessage('No se encontraron usuarios');
-      }
+      // Filtrar el usuario actual
+      const filtered = (response.data || []).filter(u => u.userId !== userId);
+      setSearchResults(filtered);
     } catch (error) {
       console.error('Error searching users:', error);
-      setErrorMessage('Error en la búsqueda');
     } finally {
       setLoading(false);
     }
-  };
-
+  }; 
   const sendFriendRequest = async (receiverId: string) => {
-    if (!user) return;
-
-    setLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-    
-    try {
-      const existingResponse = await client.models.Friendship.list({
-        filter: {
-          or: [
-            { requesterId: { eq: user.userId }, receiverId: { eq: receiverId } },
-            { requesterId: { eq: receiverId }, receiverId: { eq: user.userId } }
-          ]
-        }
-      });
-
-      if (existingResponse.data && existingResponse.data.length > 0) {
-        setErrorMessage('Ya existe una solicitud de amistad con este usuario');
-        return;
+  if (!userId) return;
+  
+  try {
+    // Verificar si ya existe una solicitud
+    const existingRequest = await client.models.Friendship.list({
+      filter: {
+        or: [
+          { requesterId: { eq: userId }, receiverId: { eq: receiverId } },
+          { requesterId: { eq: receiverId }, receiverId: { eq: userId } }
+        ]
       }
+    });
 
-      await client.models.Friendship.create({
-        requesterId: user.userId,
-        receiverId: receiverId,
-        status: 'PENDING',
-      });
-
-      setSuccessMessage('Solicitud enviada correctamente');
-      
-      setTimeout(() => {
-        setShowSearchModal(false);
-        setSearchQuery('');
-        setSearchResults([]);
-        setSuccessMessage('');
-      }, 2000);
-    } catch (error) {
-      console.error('Error sending friend request:', error);
-      setErrorMessage('Error al enviar la solicitud');
-    } finally {
-      setLoading(false);
+    if (existingRequest.data && existingRequest.data.length > 0) {
+      alert('Ya existe una solicitud de amistad con este usuario');
+      return;
     }
-  };
+
+    // Verificar si el usuario receptor es un usuario de ejemplo
+    const isExampleUser = receiverId.startsWith('sample-user-') || 
+                          receiverId.startsWith('user-');
+
+    // Si es usuario de ejemplo, crear la amistad directamente como ACCEPTED
+    // Si es usuario real, crear como PENDING
+    const friendshipStatus = isExampleUser ? 'ACCEPTED' : 'PENDING';
+
+    await client.models.Friendship.create({
+      requesterId: userId,
+      receiverId,
+      status: friendshipStatus,
+    });
+    
+    if (isExampleUser) {
+      alert('✅ ¡Ahora sois amigos!');
+    } else {
+      alert('✅ Solicitud de amistad enviada\n\nEspera a que el usuario acepte tu solicitud.');
+    }
+    
+    setShowSearchModal(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    
+    // Recargar datos
+    await loadFriends();
+    await loadSuggestedUsers();
+  } catch (error) {
+    console.error('Error sending friend request:', error);
+    alert('❌ Error al enviar solicitud');
+  }
+};
 
   const acceptFriendRequest = async (requestId: string) => {
-    setLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-    
     try {
       await client.models.Friendship.update({
         id: requestId,
         status: 'ACCEPTED',
       });
-
-      setSuccessMessage('¡Solicitud aceptada! Ahora sois amigos 🎉');
       
-      // CORREGIDO: Recargar ambas listas
+      alert('✅ Solicitud aceptada');
       await loadFriends();
       await loadFriendRequests();
-      
-      // NUEVO: Notificar al componente padre para actualizar estadísticas
-      if (onUpdate) {
-        onUpdate();
-      }
-      
-      setTimeout(() => setSuccessMessage(''), 3000);
+      await loadSuggestedUsers();
     } catch (error) {
       console.error('Error accepting friend request:', error);
-      setErrorMessage('Error al aceptar la solicitud');
-    } finally {
-      setLoading(false);
+      alert('❌ Error al aceptar solicitud');
     }
   };
 
   const rejectFriendRequest = async (requestId: string) => {
-    setLoading(true);
-    setErrorMessage('');
-    setSuccessMessage('');
-    
     try {
       await client.models.Friendship.update({
         id: requestId,
         status: 'REJECTED',
       });
-
-      setSuccessMessage('Solicitud rechazada');
-      await loadFriendRequests();
       
-      setTimeout(() => setSuccessMessage(''), 3000);
+      alert('Solicitud rechazada');
+      await loadFriendRequests();
+      await loadSuggestedUsers();
     } catch (error) {
       console.error('Error rejecting friend request:', error);
-      setErrorMessage('Error al rechazar la solicitud');
+      alert('❌ Error al rechazar solicitud');
+    }
+  };
+
+  const handleCreateSampleUsers = async () => {
+    setCreatingUsers(true);
+    try {
+      const result = await createSampleUsersOnly();
+      alert(`✅ ${result.created} usuarios de ejemplo creados!\n\nAhora puedes buscarlos y añadirlos como amigos.`);
+      await loadSuggestedUsers();
+    } catch (error) {
+      console.error('Error creating sample users:', error);
+      alert('❌ Error al crear usuarios de ejemplo');
     } finally {
-      setLoading(false);
+      setCreatingUsers(false);
     }
   };
 
   return (
     <div className="friends-page">
-      <button className="back-button" onClick={() => window.history.back()}>
-        ← Volver
-      </button>
-
       <div className="friends-header">
         <h1>Mis Amigos</h1>
-        <Button variant="primary" onClick={() => setShowSearchModal(true)}>
-          🔍 Buscar Amigos
-        </Button>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          {suggestedUsers.length === 0 && (
+            <Button 
+              variant="secondary" 
+              onClick={handleCreateSampleUsers}
+              loading={creatingUsers}
+            >
+              👥 Crear Usuarios Ejemplo
+            </Button>
+          )}
+          <Button variant="primary" onClick={() => setShowSearchModal(true)}>
+            🔍 Buscar Usuarios
+          </Button>
+        </div>
       </div>
 
-      {successMessage && (
-        <div className="success-message">{successMessage}</div>
-      )}
-
-      {errorMessage && (
-        <div className="error-message">{errorMessage}</div>
-      )}
-
+      {/* Solicitudes Pendientes */}
       {friendRequests.length > 0 && (
         <Card title={`Solicitudes de Amistad (${friendRequests.length})`} className="mb-lg">
           <div className="friend-requests-list">
@@ -271,7 +298,7 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
                       <img src={request.requester.photo} alt={request.requester.username} />
                     ) : (
                       <div className="avatar-placeholder">
-                        {request.requester?.username?.charAt(0).toUpperCase()}
+                        {request.requester?.username?.charAt(0).toUpperCase() || '?'}
                       </div>
                     )}
                   </div>
@@ -288,17 +315,15 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
                     variant="primary"
                     size="small"
                     onClick={() => acceptFriendRequest(request.id)}
-                    loading={loading}
                   >
-                    ✓ Aceptar
+                    ✅ Aceptar
                   </Button>
                   <Button
                     variant="secondary"
                     size="small"
                     onClick={() => rejectFriendRequest(request.id)}
-                    loading={loading}
                   >
-                    ✗ Rechazar
+                    ❌ Rechazar
                   </Button>
                 </div>
               </div>
@@ -307,16 +332,75 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
         </Card>
       )}
 
-      <Card title={`Amigos (${friends.length})`}>
-        {friends.length === 0 ? (
+      {/* Usuarios Sugeridos */}
+      {suggestedUsers.length > 0 && (
+        <Card title="Usuarios que podrías conocer" className="mb-lg">
+          <div className="friends-grid">
+            {suggestedUsers.map((user) => (
+              <div key={user.id} className="friend-card">
+                <div className="friend-avatar">
+                  {user.photo ? (
+                    <img src={user.photo} alt={user.username} />
+                  ) : (
+                    <div className="avatar-placeholder">
+                      {user.username?.charAt(0).toUpperCase() || '?'}
+                    </div>
+                  )}
+                </div>
+                <div className="friend-info">
+                  <h4>{user.fullName || user.username}</h4>
+                  <p className="text-sm text-secondary">@{user.username}</p>
+                  {user.location && (
+                    <p className="text-xs text-secondary">📍 {user.location}</p>
+                  )}
+                  {user.bio && (
+                    <p className="text-xs text-secondary" style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
+                      "{user.bio}"
+                    </p>
+                  )}
+                </div>
+                <div className="friend-stats">
+                  <span className="stat">
+                    🍺 <strong>{user.tastingsCount || 0}</strong> degustaciones
+                  </span>
+                </div>
+                <Button 
+                  variant="primary" 
+                  size="small" 
+                  fullWidth
+                  onClick={() => sendFriendRequest(user.userId)}
+                >
+                  ➕ Añadir amigo
+                </Button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Mensaje si no hay usuarios sugeridos */}
+      {suggestedUsers.length === 0 && friends.length === 0 && friendRequests.length === 0 && (
+        <Card>
           <div className="empty-state">
             <div className="empty-state-icon">👥</div>
-            <p>Aún no tienes amigos en BeerSp</p>
-            <Button variant="primary" onClick={() => setShowSearchModal(true)} className="mt-md">
-              Buscar Amigos
+            <h3>No hay usuarios disponibles</h3>
+            <p style={{ marginBottom: '1.5rem' }}>
+              Crea usuarios de ejemplo para poder añadir amigos y explorar la funcionalidad social de BeerSp
+            </p>
+            <Button 
+              variant="primary" 
+              onClick={handleCreateSampleUsers}
+              loading={creatingUsers}
+            >
+              👥 Crear Usuarios de Ejemplo
             </Button>
           </div>
-        ) : (
+        </Card>
+      )}
+
+      {/* Lista de Amigos */}
+      {friends.length > 0 && (
+        <Card title={`Mis Amigos (${friends.length})`}>
           <div className="friends-grid">
             {friends.map((friend) => (
               <div key={friend.id} className="friend-card">
@@ -325,7 +409,7 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
                     <img src={friend.photo} alt={friend.username} />
                   ) : (
                     <div className="avatar-placeholder">
-                      {friend.username?.charAt(0).toUpperCase()}
+                      {friend.username?.charAt(0).toUpperCase() || '?'}
                     </div>
                   )}
                 </div>
@@ -335,39 +419,38 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
                   {friend.location && (
                     <p className="text-xs text-secondary">📍 {friend.location}</p>
                   )}
+                  {friend.bio && (
+                    <p className="text-xs text-secondary" style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
+                      "{friend.bio}"
+                    </p>
+                  )}
                 </div>
                 <div className="friend-stats">
                   <span className="stat">
                     🍺 <strong>{friend.tastingsCount || 0}</strong> degustaciones
                   </span>
                 </div>
+                <Button variant="secondary" size="small" fullWidth>
+                  👤 Ver Perfil
+                </Button>
               </div>
             ))}
           </div>
-        )}
-      </Card>
+        </Card>
+      )}
 
+      {/* Modal de Búsqueda */}
       <Modal
         isOpen={showSearchModal}
         onClose={() => {
           setShowSearchModal(false);
           setSearchQuery('');
           setSearchResults([]);
-          setErrorMessage('');
-          setSuccessMessage('');
         }}
-        title="Buscar Amigos"
+        title="Buscar Usuarios"
         size="medium"
       >
         <div className="search-modal-content">
-          {successMessage && (
-            <div className="success-message">{successMessage}</div>
-          )}
-
-          {errorMessage && (
-            <div className="error-message">{errorMessage}</div>
-          )}
-
           <div className="search-input-container">
             <Input
               placeholder="Buscar por nombre de usuario, email o nombre..."
@@ -385,37 +468,51 @@ const Friends: React.FC<FriendsProps> = ({ onUpdate }) => {
             <div className="search-results">
               <h4>Resultados ({searchResults.length})</h4>
               <div className="results-list">
-                {searchResults.map((userProfile) => (
-                  <div key={userProfile.id} className="search-result-item">
+                {searchResults.map((user) => (
+                  <div key={user.id} className="search-result-item">
                     <div className="user-info">
                       <div className="user-avatar">
-                        {userProfile.photo ? (
-                          <img src={userProfile.photo} alt={userProfile.username} />
+                        {user.photo ? (
+                          <img src={user.photo} alt={user.username} />
                         ) : (
                           <div className="avatar-placeholder">
-                            {userProfile.username?.charAt(0).toUpperCase()}
+                            {user.username?.charAt(0).toUpperCase() || '?'}
                           </div>
                         )}
                       </div>
                       <div className="user-details">
-                        <h5>{userProfile.fullName || userProfile.username}</h5>
-                        <p className="text-sm text-secondary">@{userProfile.username}</p>
-                        {userProfile.location && (
-                          <p className="text-xs text-secondary">📍 {userProfile.location}</p>
+                        <h5>{user.fullName || user.username}</h5>
+                        <p className="text-sm text-secondary">@{user.username}</p>
+                        {user.location && (
+                          <p className="text-xs text-secondary">📍 {user.location}</p>
+                        )}
+                        {user.bio && (
+                          <p className="text-xs text-secondary" style={{ marginTop: '0.25rem' }}>
+                            {user.bio}
+                          </p>
                         )}
                       </div>
                     </div>
                     <Button
                       variant="primary"
                       size="small"
-                      onClick={() => sendFriendRequest(userProfile.userId)}
-                      loading={loading}
+                      onClick={() => sendFriendRequest(user.userId)}
                     >
-                      Enviar Solicitud
+                      ➕ Enviar Solicitud
                     </Button>
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {searchQuery && searchResults.length === 0 && !loading && (
+            <div className="empty-state">
+              <div className="empty-state-icon">🔍</div>
+              <p>No se encontraron usuarios</p>
+              <p className="text-sm text-secondary" style={{ marginTop: '0.5rem' }}>
+                Intenta buscar por nombre de usuario o nombre completo
+              </p>
             </div>
           )}
         </div>
