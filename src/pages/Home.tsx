@@ -13,7 +13,7 @@ interface HomeProps {
 }
 
 const Home: React.FC<HomeProps> = ({ userProfile, onRefresh }) => {
-  const [recentTastings, setRecentTastings] = useState<any[]>([]);
+  //const [recentTastings, setRecentTastings] = useState<any[]>([]);
   const [favoriteBeers, setFavoriteBeers] = useState<any[]>([]);
   const [recentBadges, setRecentBadges] = useState<any[]>([]);
   const [friendRequests, setFriendRequests] = useState<any[]>([]);
