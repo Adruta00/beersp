@@ -284,4 +284,194 @@
   .badges-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Sección de progreso */
+.progress-section {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-surface-dark);
+}
+
+.progress-section h4 {
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.progress-item {
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--color-surface-dark);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-top: var(--spacing-xs);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width var(--transition-base);
+}
+
+/* Lista de solicitudes */
+.requests-list {
+  margin-top: var(--spacing-sm);
+}
+
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.request-item:last-child {
+  border-bottom: none;
+}
+
+.request-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Cervezas en tendencia */
+.trending-beers .trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.trending-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-dark);
+  transition: all var(--transition-fast);
+}
+
+.trending-item:hover {
+  background: var(--color-primary-light);
+  transform: translateX(2px);
+}
+
+.trending-rank {
+  flex-shrink: 0;
+}
+
+.trend-indicator {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-success);
+  background: var(--color-surface);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.trending-info {
+  flex: 1;
+}
+
+.trending-stats {
+  display: flex;
+  align-items: center;
+  margin-top: var(--spacing-xs);
+}
+
+/* Acciones rápidas */
+.actions-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background: var(--color-surface-dark);
+  border: 1px solid var(--color-surface-dark);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 80px;
+}
+
+.action-btn:hover {
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+.action-btn span:first-child {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.action-btn span:last-child {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Resumen de galardones */
+.badges-summary {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-surface-dark);
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-summary {
+    grid-column: span 1;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .actions-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .home-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .badges-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
 }

@@ -26,19 +26,71 @@ const Search: React.FC = () => {
     loadAllData();
   }, []);
 
-  const loadAllData = async () => {
-    try {
-      // Cargar todas las cervezas
-      const beersResponse = await client.models.Beer.list({ limit: 1000 });
-      setAllBeers(beersResponse.data || []);
-
-      // Cargar todos los locales
-      const venuesResponse = await client.models.Venue.list({ limit: 1000 });
-      setAllVenues(venuesResponse.data || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    }
-  };
+ const loadAllData = async () => {
+  try {
+    // Cargar todas las cervezas ficticias (usa las mismas que en TopRated.tsx)
+    const mockBeers = [
+      // Cervezas Españolas
+      { id: '1', name: 'Alhambra Reserva 1925', style: 'LAGER', country: 'ES', color: 'GOLDEN_YELLOW', alcoholPercentage: 6.4, ibu: 25, averageRating: 4.4, ratingsCount: 5213, description: 'Iconica lager premium de Granada, intensa y con cuerpo.', createdAt: '2023-01-15' },
+      { id: '2', name: 'Mahou 5 Estrellas', style: 'LAGER', country: 'ES', color: 'GOLDEN_YELLOW', alcoholPercentage: 5.5, ibu: 27, averageRating: 4.2, ratingsCount: 4567, description: 'El sabor clásico de Madrid, equilibrada y refrescante.', createdAt: '2023-02-20' },
+      { id: '3', name: 'Estrella Galicia Especial', style: 'LAGER', country: 'ES', color: 'LIGHT_GOLD', alcoholPercentage: 5.5, ibu: 25, averageRating: 4.3, ratingsCount: 4890, description: 'Cerveza gallega de sabor lupulado y refrescante.', createdAt: '2023-03-10' },
+      { id: '4', name: '1906 Red Vintage', style: 'AMBER_ALE', country: 'ES', color: 'LIGHT_AMBER', alcoholPercentage: 8.0, ibu: 28, averageRating: 4.6, ratingsCount: 3214, description: 'La colorada, intensa y equilibrada.', createdAt: '2023-04-05' },
+      { id: '5', name: 'Voll-Damm Doble Malta', style: 'AMBER_ALE', country: 'ES', color: 'LIGHT_AMBER', alcoholPercentage: 7.2, ibu: 35, averageRating: 4.5, ratingsCount: 2987, description: 'Märzenbier de cuerpo intenso y sabor tostado.', createdAt: '2023-05-12' },
+      
+      // Cervezas Alemanas
+      { id: '6', name: 'Paulaner Hefe-Weissbier', style: 'WEISSBIER', country: 'DE', color: 'GOLDEN_YELLOW', alcoholPercentage: 5.5, ibu: 12, averageRating: 4.7, ratingsCount: 3124, description: 'La cerveza de trigo número 1 en Alemania.', createdAt: '2023-06-18' },
+      { id: '7', name: 'Erdinger Weissbier', style: 'WEISSBIER', country: 'DE', color: 'GOLDEN_YELLOW', alcoholPercentage: 5.3, ibu: 13, averageRating: 4.5, ratingsCount: 2876, description: 'Clásica de trigo bávara.', createdAt: '2023-07-22' },
+      { id: '8', name: 'Augustiner Helles', style: 'LAGER', country: 'DE', color: 'LIGHT_GOLD', alcoholPercentage: 5.2, ibu: 18, averageRating: 4.8, ratingsCount: 4123, description: 'La lager favorita de Múnich.', createdAt: '2023-08-30' },
+      
+      // Cervezas Belgas
+      { id: '9', name: 'Chimay Azul', style: 'AMBER_ALE', country: 'BE', color: 'DARK_BROWN', alcoholPercentage: 9.0, ibu: 35, averageRating: 4.9, ratingsCount: 5678, description: 'Trapense oscura, compleja y afrutada.', createdAt: '2023-09-14' },
+      { id: '10', name: 'Duvel', style: 'AMBER_ALE', country: 'BE', color: 'GOLDEN_YELLOW', alcoholPercentage: 8.5, ibu: 32, averageRating: 4.8, ratingsCount: 4567, description: 'Strong Ale de referencia, burbujeante.', createdAt: '2023-10-08' },
+      
+      // Cervezas Americanas
+      { id: '12', name: 'Sierra Nevada Pale Ale', style: 'APA', country: 'US', color: 'LIGHT_AMBER', alcoholPercentage: 5.6, ibu: 38, averageRating: 4.6, ratingsCount: 4567, description: 'La APA que inició la revolución artesanal.', createdAt: '2023-12-03' },
+      { id: '13', name: 'Lagunitas IPA', style: 'IPA', country: 'US', color: 'LIGHT_GOLD', alcoholPercentage: 6.2, ibu: 51, averageRating: 4.5, ratingsCount: 4321, description: 'IPA de California icónica y balanceada.', createdAt: '2024-01-15' },
+      
+      // Cervezas Checas
+      { id: '15', name: 'Pilsner Urquell', style: 'PILSNER', country: 'CZ', color: 'LIGHT_GOLD', alcoholPercentage: 4.4, ibu: 40, averageRating: 4.5, ratingsCount: 12345, description: 'La primera pilsner dorada del mundo (1842).', createdAt: '2024-03-05' },
+      
+      // Cervezas Irlandesas
+      { id: '16', name: 'Guinness Draught', style: 'STOUT', country: 'IE', color: 'OPAQUE_BLACK', alcoholPercentage: 4.2, ibu: 45, averageRating: 4.6, ratingsCount: 8921, description: 'La stout más icónica, cremosa y tostada.', createdAt: '2024-04-10' },
+    ];
+    
+    setAllBeers(mockBeers);
+    
+    // Locales ficticios
+    const mockVenues = [
+      { id: '1', name: 'Garage Beer Co.', address: 'Carrer del Consell de Cent, 261', city: 'Barcelona', country: 'ES', likes: 456 },
+      { id: '2', name: 'Cervecería Catalana', address: 'Carrer de Mallorca, 236', city: 'Barcelona', country: 'ES', likes: 389 },
+      { id: '3', name: 'BierCaB', address: 'Carrer de la Muntaner, 55', city: 'Barcelona', country: 'ES', likes: 421 },
+      { id: '4', name: 'La Tape', address: 'Calle de San Bernardo, 88', city: 'Madrid', country: 'ES', likes: 345 },
+      { id: '5', name: 'Fábrica Maravillas', address: 'Calle de Valverde, 29', city: 'Madrid', country: 'ES', likes: 398 },
+      { id: '6', name: 'Delirium Café', address: 'Impasse de la Fidélité 4A', city: 'Bruselas', country: 'BE', likes: 567 },
+      { id: '7', name: 'Hofbräuhaus München', address: 'Platzl 9', city: 'Múnich', country: 'DE', likes: 678 },
+      { id: '8', name: 'The Temple Bar', address: '47 Temple Bar', city: 'Dublin', country: 'IE', likes: 512 },
+      { id: '9', name: 'Tyris on Tap', address: 'Carrer de la Pau, 27', city: 'Valencia', country: 'ES', likes: 287 },
+      { id: '10', name: 'BlackLab Brewhouse', address: 'Carrer de la Diputació, 251', city: 'Barcelona', country: 'ES', likes: 321 }
+    ];
+    
+    setAllVenues(mockVenues);
+  } catch (error) {
+    console.error('Error loading data:', error);
+    // En caso de error, usar datos ficticios mínimos
+    const mockBeers = [
+      { id: '1', name: 'Alhambra Reserva 1925', style: 'LAGER', country: 'ES', color: 'GOLDEN_YELLOW', alcoholPercentage: 6.4, ibu: 25, averageRating: 4.4, ratingsCount: 5213, description: 'Iconica lager premium de Granada.' },
+      { id: '2', name: 'Mahou 5 Estrellas', style: 'LAGER', country: 'ES', color: 'GOLDEN_YELLOW', alcoholPercentage: 5.5, ibu: 27, averageRating: 4.2, ratingsCount: 4567, description: 'El sabor clásico de Madrid.' },
+    ];
+    
+    const mockVenues = [
+      { id: '1', name: 'Garage Beer Co.', address: 'Carrer del Consell de Cent, 261', city: 'Barcelona', country: 'ES', likes: 456 },
+      { id: '2', name: 'Cervecería Catalana', address: 'Carrer de Mallorca, 236', city: 'Barcelona', country: 'ES', likes: 389 },
+    ];
+    
+    setAllBeers(mockBeers);
+    setAllVenues(mockVenues);
+  }
+};
 
   const handleSearch = async () => {
     if (!query.trim() && category !== 'all') {
